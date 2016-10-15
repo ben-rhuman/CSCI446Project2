@@ -18,10 +18,8 @@ public class Agent {
     private int direction; //1 = North, 2 = East, 3 = South, 4 = West
     private int moveCounter;
     private Location currentLocation;
-    //InferenceEngine iEngine;
     private int arrowCount;
     private Map worldMap;
-    private KnowledgeBase KB;
     private InferenceEngine IE;
 
     public Agent(int x, int y, int numGold, int direction, Map worldMap) {  //Direction in our case should always be 2 (i.e. East) at start.
@@ -30,8 +28,7 @@ public class Agent {
         this.payOff = numGold;
         this.direction = direction;
         this.worldMap = worldMap;
-        KB = new KnowledgeBase(worldMap.size);
-        IE = new InferenceEngine();
+        IE = new InferenceEngine(worldMap.size);
         boolean[] percept;
         percept = worldMap.checkPerceptAtLocation(currentLocation);
     }
