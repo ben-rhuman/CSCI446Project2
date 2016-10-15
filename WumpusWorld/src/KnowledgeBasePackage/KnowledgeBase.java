@@ -30,4 +30,9 @@ public class KnowledgeBase {
     public void updateKnowledgeBase(boolean[] percept, Location location){
         
     }
+    
+    public KBRoom getRoomState(int x, int y){
+        return KBMap[x][y];
+    }
+    
 }
