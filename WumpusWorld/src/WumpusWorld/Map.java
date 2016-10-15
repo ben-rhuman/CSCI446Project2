@@ -8,7 +8,6 @@ package WumpusWorld;
  */
 
 
-import WumpusWorld.Room;
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,18 +35,6 @@ public class Map {
 
     }
 
-    public void printAttributes() {
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-
-                System.out.println("Spot" + j + ", "+ i);
-                System.out.println("breeze?"+world[j][i].getBreeze());
-                System.out.println("stench?"+world[j][i].getStench());
-                System.out.println("glitter?"+world[j][i].getGlitter());
-            }
-            System.out.println("");
-        }
-    }
     
     
 /////////////////////MAP SETUP////////////////////////////
@@ -59,7 +46,6 @@ public class Map {
                 world[i][j] = rm;
             }
         }
-
     }
 
     public void setupGold() {
@@ -339,4 +325,19 @@ public boolean[] checkPerceptAtLocation(Location loc){
             System.out.println("");
         }
     }
+    
+    
+    public void printAttributes() {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+
+                System.out.println("Spot" + j + ", "+ i);
+                System.out.println("breeze?"+world[j][i].getBreeze());
+                System.out.println("stench?"+world[j][i].getStench());
+                System.out.println("glitter?"+world[j][i].getGlitter());
+            }
+            System.out.println("");
+        }
+    }
 }
+
