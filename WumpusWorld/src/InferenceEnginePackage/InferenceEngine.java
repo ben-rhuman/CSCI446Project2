@@ -19,16 +19,17 @@ public class InferenceEngine {
         
     }
     
-    public ArrayList ASK(){  //Allows the IE to tell the agent was move to take
-        
-        
-    }
-    
-    
-    private ArrayList PLAN(){
+    public ArrayList ASK(){  //Allows the IE to tell the agent which move to take
         
     }
-    
+       
+    private ArrayList PLAN(){ //provides a list of actions
+        ArrayList<Integer> plan = new ArrayList<Integer>();
+        
+       // for(int i = 0; i < )
+        
+        return plan;
+    }
     public void updateKnowledgeBase(){
     }
     

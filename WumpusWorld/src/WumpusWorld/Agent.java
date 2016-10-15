@@ -30,7 +30,7 @@ public class Agent {
         this.payOff = numGold;
         this.direction = direction;
         this.worldMap = worldMap;
-        KB = new KnowledgeBase(worldMap.size);
+        
         IE = new InferenceEngine();
         boolean[] percept;
         percept = worldMap.checkPerceptAtLocation(currentLocation);
