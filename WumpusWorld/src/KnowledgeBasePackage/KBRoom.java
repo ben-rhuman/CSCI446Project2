@@ -13,7 +13,8 @@ public class KBRoom {
 
     //Knowlege base specific information
     public boolean unknown;
-    public boolean safe;  
+    public boolean safe; 
+    public boolean kindaSafe;
     public boolean knownWumpus;
     public boolean possibleWumpus;
     public boolean knownPit;
@@ -28,6 +29,7 @@ public class KBRoom {
     public KBRoom(){
     unknown = true;
     safe = false;
+    kindaSafe = false;
     knownWumpus = false;
     possibleWumpus = false;
     knownPit = false;

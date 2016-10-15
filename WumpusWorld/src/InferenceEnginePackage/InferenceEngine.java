@@ -46,7 +46,7 @@ public class InferenceEngine {
 //(5)New room is wumpus
 //(6)New room is gold
     public void updateKnowledgeBase(boolean[] percept) {
-        
+
         KB.KBMap[agentLocation.i][agentLocation.j].unknown = false;
         //Used for code readablity
         boolean obstacle = percept[1];
@@ -77,10 +77,13 @@ public class InferenceEngine {
         } else if (breezy && stinky) {
             KB.KBMap[agentLocation.i][agentLocation.j].breeze = true;
             KB.KBMap[agentLocation.i][agentLocation.j].stench = true;
+            KB.KBMap[agentLocation.i][agentLocation.j].kindaSafe = true;
         } else if (breezy) {
             KB.KBMap[agentLocation.i][agentLocation.j].breeze = true;
+            KB.KBMap[agentLocation.i][agentLocation.j].kindaSafe = true;
         } else if (stinky) {
             KB.KBMap[agentLocation.i][agentLocation.j].stench = true;
+            KB.KBMap[agentLocation.i][agentLocation.j].kindaSafe = true;
         } else { //Determines whether or not space can be marked as safe.
             KB.setSafe(agentLocation.i, agentLocation.j);
         }
@@ -90,8 +93,55 @@ public class InferenceEngine {
         }
     }
 
-    private void LocicalMapDeduction(){
-        
+    private void LocicalMapDeduction() {
+        for (int i = 0; i < KB.KBMap.length; i++) {
+            for (int j = 0; j < KB.KBMap[i].length; j++) {
+                inferNewFacts(i, j);
+            }
+        }
     }
-    
+
+    private void inferNewFacts(int i, int j) {
+        if(KB.KBMap[i][j].unknown == false){   
+            if (KB.KBMap[i][j].safe) {  //Modifies places adjacent to kindaSafe
+                KB.setKindaSafe(i, j-1);
+                KB.setKindaSafe(i, j+1);
+                KB.setKindaSafe(i-1, j);
+                KB.setKindaSafe(i+1, j);
+            } else if(KB.KBMap[i][j].breeze && KB.KBMap[i][j].stench){  //Marks possible wumpus/pit if nto already marked kindaSafe
+                KB.setPossiblePit(i, j-1);
+                KB.setPossibleWumpus(i, j-1);
+                KB.setPossiblePit(i, j+1);
+                KB.setPossibleWumpus(i, j+1);
+                KB.setPossiblePit(i-1, j);
+                KB.setPossibleWumpus(i-1, j);
+                KB.setPossiblePit(i+1, j);
+                KB.setPossibleWumpus(i+1, j);
+            } else if(KB.KBMap[i][j].breeze){ //Marks possible pit
+                KB.setPossiblePit(i, j-1);
+                KB.setPossiblePit(i, j+1);
+                KB.setPossiblePit(i-1, j);
+                KB.setPossiblePit(i+1, j);
+            } else if(KB.KBMap[i][j].stench){ //Marks possible wumpus
+                KB.setPossibleWumpus(i, j-1);
+                KB.setPossibleWumpus(i, j+1);
+                KB.setPossibleWumpus(i-1, j);
+                KB.setPossibleWumpus(i+1, j);
+            } else if(KB.KBMap[i][j].possiblePit){ //Try to debunk or confirm possible pit
+                if(KB.checkSafe(i,j-1) || KB.checkSafe(i,j+1) || KB.checkSafe(i-1,j) || KB.checkSafe(i+1,j)){
+                    KB.setKindaSafe(i,j);
+                } else if(!KB.checkUnknown(i,j-1) || !KB.checkUnknown(i,j+1) || !KB.checkUnknown(i-1,j) || !KB.checkUnknown(i+1,j)){
+                    KB.setKnownPit(i,j);
+                }
+            } else if(KB.KBMap[i][j].possibleWumpus){
+                if(KB.checkSafe(i,j-1) || KB.checkSafe(i,j+1) || KB.checkSafe(i-1,j) || KB.checkSafe(i+1,j)){
+                    KB.setKindaSafe(i,j);
+                } else if(!KB.checkUnknown(i,j-1) || !KB.checkUnknown(i,j+1) || !KB.checkUnknown(i-1,j) || !KB.checkUnknown(i+1,j)){
+                    KB.setKnownWumpus(i,j);
+                }
+            }
+        }
+    }
+
 }
+
