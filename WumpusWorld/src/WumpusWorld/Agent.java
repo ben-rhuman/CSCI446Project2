@@ -74,7 +74,7 @@ public class Agent {
     //////////////////////////// Agent - Inference Engine Methods ////////////////////////////
     
     private void TELL(boolean[] percept) {
-        IE.TELL(percept);   // Tells the IE what the current percepts are
+        IE.TELL(percept, currentLocation, direction);   // Tells the IE what the current percepts are
     }
     
     private ArrayList ASK(){

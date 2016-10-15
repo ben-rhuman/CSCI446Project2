@@ -14,12 +14,17 @@ import java.util.ArrayList;
  */
 public class InferenceEngine {
     
+    private Location agentLocation;
+    private int agentDirection;
     
-    public void TELL(boolean[] percept){  // Allows tha agent to tell the IE about its percepts
-        
+    public void TELL(boolean[] percept, Location location, int direction){  // Allows tha agent to tell the IE about its percepts
+      agentLocation = location;
+      agentDirection = direction;
+      
+      updateKnowledgeBase(percept);
     }
     
-    public ArrayList ASK(){  //Allows the IE to tell the agent was move to take
+    public ArrayList ASK(){  //Allows the IE to tell the agent a list of moves to take
         
         
     }
@@ -28,7 +33,9 @@ public class InferenceEngine {
     private ArrayList PLAN(){
         
     }
-    public void updateKnowledgeBase(){
+    
+    public void updateKnowledgeBase(boolean[] percept){
+        
     }
     
     
