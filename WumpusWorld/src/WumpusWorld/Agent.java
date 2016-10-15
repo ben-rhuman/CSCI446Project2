@@ -5,6 +5,7 @@ import WumpusWorld.Map;
 import static java.lang.Math.abs;
 import KnowledgeBasePackage.KnowledgeBase;
 import InferenceEnginePackage.InferenceEngine;
+import java.util.ArrayList;
 
 /*
  * Wumpus World using First Order Logic
@@ -67,7 +68,16 @@ public class Agent {
     }
 
         //////////////////////// End Agent Action Methods //////////////////////////////////
-    private void query() {
-
+    
+    
+    
+    //////////////////////////// Agent - Inference Engine Methods ////////////////////////////
+    
+    private void TELL(boolean[] percept) {
+        IE.TELL(percept);   // Tells the IE what the current percepts are
+    }
+    
+    private ArrayList ASK(){
+        return IE.ASK();  //Asks the IE what move it should take. 
     }
 }
