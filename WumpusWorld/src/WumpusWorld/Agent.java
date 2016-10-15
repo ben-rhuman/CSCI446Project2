@@ -44,7 +44,7 @@ public class Agent {
         } else {
             direction--;
         }
-        payOff += 10;
+        payOff -= 10;
     }
 
     private void turnRight() { // Rotates the agent 90 degrees to the right
@@ -53,7 +53,7 @@ public class Agent {
         } else {
             direction++;
         }
-        payOff += 10;
+        payOff -= 10;
     }
 
     private boolean shootArrow() {  //Shoots an arrow in the direction the agent is facing

@@ -49,6 +49,8 @@ public class InferenceEngine {
 //(6)New room is gold
     
     public void updateKnowledgeBase(boolean[] percept){
+        
+        //Used for code readablity
         boolean obstacle = percept[1];
         boolean breezy = percept[2];
         boolean stinky = percept[3];
@@ -57,10 +59,25 @@ public class InferenceEngine {
         boolean glitter = percept[6];
         
         
-        if(obstacle){
+        if(obstacle){   //If the agent hits an obstacle we need to correct for the fact that that the agentLocation is deferent from the location of the space we our updating
             KB.setObstacle(agentLocation.i, agentLocation.j);
-        }else if(!breezy && !stinky && !pit && !wumpus){ //Determines whether or not space can be marked as safe.
+        }else if(pit){
+            KB.setKnownPit(agentLocation.i, agentLocation.j);   //Agent is dead, but we still need to update the map
+        }else if(wumpus){
+            KB.setKnownWumpus(agentLocation.i, agentLocation.j);   //Agent is dead, still need to update map.
+        }else if(breezy && stinky){
+            KB.KBMap[agentLocation.i][agentLocation.j].breeze = true;
+            KB.KBMap[agentLocation.i][agentLocation.j].stench = true;
+        } else if(breezy){
+            KB.KBMap[agentLocation.i][agentLocation.j].breeze = true;
+        }else if(stinky){
+            KB.KBMap[agentLocation.i][agentLocation.j].stench = true;
+        }else{ //Determines whether or not space can be marked as safe.
             KB.setSafe(agentLocation.i, agentLocation.j);
+        }
+        
+        if(glitter){
+            KB.KBMap[agentLocation.i][agentLocation.j].glitter = true;
         }
     }
     

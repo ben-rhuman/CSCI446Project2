@@ -16,7 +16,7 @@ import InferenceEnginePackage.*;
 
 public class KnowledgeBase {
     
-    KBRoom[][] KBMap;
+    public KBRoom[][] KBMap;
     
     public KnowledgeBase(int worldSize){
         KBMap = new KBRoom[worldSize][worldSize];
