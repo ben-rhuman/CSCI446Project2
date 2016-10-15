@@ -19,7 +19,12 @@ public class KnowledgeBase {
     KBRoom[][] KBMap;
     
     public KnowledgeBase(int worldSize){
-        
+        KBMap = new KBRoom[worldSize][worldSize];
+        for(int i = 0; i < KBMap.length; i++){
+            for(int j = 0; j < KBMap[i].length; j++){
+                KBMap[i][j] = new KBRoom();  //Initialized the KBMap to the starting state.
+            }
+        }
     }
     
     public void updateKnowledgeBase(boolean[] percept, Location location){
