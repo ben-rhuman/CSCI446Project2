@@ -18,10 +18,8 @@ public class Agent {
     private int direction; //1 = North, 2 = East, 3 = South, 4 = West
     private int moveCounter;
     private Location currentLocation;
-    //InferenceEngine iEngine;
     private int arrowCount;
     private Map worldMap;
-    private KnowledgeBase KB;
     private InferenceEngine IE;
 
     public Agent(int x, int y, int numGold, int direction, Map worldMap) {  //Direction in our case should always be 2 (i.e. East) at start.
@@ -31,7 +29,8 @@ public class Agent {
         this.direction = direction;
         this.worldMap = worldMap;
         
-        IE = new InferenceEngine();
+        IE = new InferenceEngine(worldMap.size);
+        
         boolean[] percept;
         percept = worldMap.checkPerceptAtLocation(currentLocation);
     }
@@ -47,7 +46,7 @@ public class Agent {
         } else {
             direction--;
         }
-        payOff += 10;
+        payOff -= 10;
     }
 
     private void turnRight() { // Rotates the agent 90 degrees to the right
@@ -56,7 +55,7 @@ public class Agent {
         } else {
             direction++;
         }
-        payOff += 10;
+        payOff -= 10;
     }
 
     private boolean shootArrow() {  //Shoots an arrow in the direction the agent is facing
@@ -74,7 +73,7 @@ public class Agent {
     //////////////////////////// Agent - Inference Engine Methods ////////////////////////////
     
     private void TELL(boolean[] percept) {
-        IE.TELL(percept);   // Tells the IE what the current percepts are
+        IE.TELL(percept, currentLocation, direction);   // Tells the IE what the current percepts are
     }
     
     private ArrayList ASK(){

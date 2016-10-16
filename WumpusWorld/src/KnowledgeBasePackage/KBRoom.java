@@ -1,11 +1,6 @@
 
 package KnowledgeBasePackage;
 
-/**
- *
- * @author benrhuman
- */
-
 public class KBRoom {
 
     //Knowlege base specific information

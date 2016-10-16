@@ -2,14 +2,15 @@ package KnowledgeBasePackage;
 
 import WumpusWorld.*;
 import InferenceEnginePackage.*;
+import java.util.ArrayList;
 
-/**
- *
- * @author benrhuman
- */
+
 public class KnowledgeBase {
 
     public KBRoom[][] KBMap;
+    public ArrayList<Location> wump;
+    public ArrayList<Location> safe;
+    public ArrayList<Location> unkown;
 
     public KnowledgeBase(int worldSize) {
         KBMap = new KBRoom[worldSize][worldSize];
@@ -22,10 +23,6 @@ public class KnowledgeBase {
 
     public void updateKnowledgeBase(boolean[] percept, Location location) {
 
-    }
-
-    public KBRoom getRoomState(int x, int y) {
-        return KBMap[x][y];
     }
 
     public void setSafe(int x, int y) {
@@ -47,6 +44,9 @@ public class KnowledgeBase {
         KBMap[x][y].knownWumpus = true;
         KBMap[x][y].possibleWumpus = false;
         KBMap[x][y].possiblePit = false;
+
+        Location l = new Location(x, y);
+        wump.add(l);
     }
 
     public void setObstacle(int x, int y) {
@@ -81,4 +81,60 @@ public class KnowledgeBase {
 
     }
 
+    public KBRoom getRoomState(int x, int y) {
+        return KBMap[x][y];
+    }
+
+    ///==================Checking Knowlege Base for Inference Engine====================
+    public boolean rightDirection(Location ag, int dir, Location w) { //check if the agent is pointing towards the wumpus 
+        if (ag.i < w.i && ag.j == w.j) { //if agent is left of wumpus
+            if(dir == 2){
+                return true;
+            }
+        } else if (ag.i > w.i && ag.j == w.j) { //if agent is to the right of wumpus
+            if(dir == 4){
+                return true;
+            }
+        } else if (ag.j < w.j && ag.i == w.i) { //if agent is below wumpus
+            if(dir == 1){
+                return true;
+            }
+        } else if (ag.j > w.j && ag.i == w.i) { // if agent is above wumpus
+            if(dir == 3){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean obstacleInWay(Location ag, Location w) { //checks if theres an obstacle or unknown (potential obstacle) inbetween agent and wumpus
+
+        if (ag.i < w.i && ag.j == w.j) { //if agent is left of wumpus
+            for (int k = ag.i; k < w.i; k++) {//check spots
+                if (getRoomState(k, ag.j).unknown || getRoomState(k, ag.j).obstacle) {
+                    return true;
+                }
+            }
+        } else if (ag.i > w.i && ag.j == w.j) { //if agent is to the right of wumpus
+            for (int k = ag.i; k > w.i; k--) {
+                if (getRoomState(k, ag.j).unknown || getRoomState(k, ag.j).obstacle) {
+                    return true;
+                }
+            }
+        } else if (ag.j < w.j && ag.i == w.i) { //if agent is below wumpus
+            for (int k = ag.j; k < w.j; k++) {
+                if (getRoomState(ag.i, k).unknown || getRoomState(ag.i, k).obstacle) {
+                    return true;
+                }
+            }
+        } else if (ag.j > w.j && ag.i == w.i) { // if agent is above wumpus
+            for (int k = ag.j; k > w.j; k--) {
+                if (getRoomState(ag.i, k).unknown || getRoomState(ag.i, k).obstacle) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }
