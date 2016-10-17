@@ -19,23 +19,24 @@ public class KnowledgeBase {
             }
         }
     }
+
     public void updateKnowledgeBase(boolean[] percept, Location location) {
 
     }
-    
-    public void setVisited(int x, int y){
-        try{
-        KBMap[x][y].unknown = false;
-        KBMap[x][y].visited = false;
-        
-        Location l = new Location(x,y);
-        visited.add(l);
-        
-        }catch (IndexOutOfBoundsException e){
+
+    public void setVisited(int x, int y) {
+        try {
+            KBMap[x][y].unknown = false;
+            KBMap[x][y].visited = false;
+
+            Location l = new Location(x, y);
+            visited.add(l);
+
+        } catch (IndexOutOfBoundsException e) {
         }
-        
+
     }
-    
+
     public void setSafe(int x, int y) {
 
         try {
@@ -44,8 +45,8 @@ public class KnowledgeBase {
             KBMap[x][y].kindaSafe = true;
             KBMap[x][y].possibleWumpus = false;
             KBMap[x][y].possiblePit = false;
-            
-            Location l = new Location(x,y);
+
+            Location l = new Location(x, y);
             safe.add(l);
         } catch (IndexOutOfBoundsException e) {
         }
@@ -159,50 +160,98 @@ public class KnowledgeBase {
     }
 
     ///==================Checking Knowlege Base for Inference Engine====================
-    
-    public ArrayList returnSafeAdjacents(Location l){ //or return visited ones
-        ArrayList<Location> adjacents = new ArrayList<Location>();
+    public ArrayList orderDirection(ArrayList<Location> l, Location w, Location agent) {
+
+        ArrayList<Location> ordered = new ArrayList<>();
+        ArrayList<Location> temp = new ArrayList<>(); //to hold the "worse" adjacents to go to
         
+        for (int i = 0; i < l.size(); i++) { //if it is increasing add it to the new list and remove it from the old 
+
+            switch (l.get(i).dir) {
+                case 1: //north
+                    if ((w.j - (agent.j--)) > (w.j - agent.j)) {  //if the wumpus is north of the explorer then north is a progressive direction towards the wumpus
+                        ordered.add(l.get(i));
+                    } else{
+                        temp.add(l.get(i));
+                    }
+                    break;
+                case 2: //east
+                    if ((w.i - (agent.i++)) < (w.i - agent.i)) {
+                        ordered.add(l.get(i));
+                    } else{
+                        temp.add(l.get(i));
+                    }
+                    break;
+                case 3: //south
+                    if ((w.j - (agent.j++)) < (w.j - agent.j)) {
+                        ordered.add(l.get(i));
+                    } else{
+                        temp.add(l.get(i));
+                    }
+                    break;
+                default: //west
+                    if ((w.i - (agent.i--)) > (w.i - agent.i)) {
+                        ordered.add(l.get(i));
+                    } else{
+                        temp.add(l.get(i));
+                    }
+                    break;
+            }       
+        }
+        
+         //add remaining non progressive adjacent spots to the list because we may still need them
+         for (int i = 0; i < temp.size(); i++) { 
+             ordered.add(l.get(i));
+         }
+
+        return ordered;
+    }
+
+    public ArrayList returnSafeAdjacents(Location l) { //or return visited ones
+        ArrayList<Location> adjacents = new ArrayList<>();
+
         try {
-            
-            if (KBMap[l.i + 1][l.j].safe || KBMap[l.i + 1][l.j].visited){
+
+            if (KBMap[l.i + 1][l.j].safe || KBMap[l.i + 1][l.j].visited) {
                 Location adj = new Location(l.i + 1, l.j);
+                adj.dir = 2;
                 adjacents.add(adj);
-                
+
             }
         } catch (IndexOutOfBoundsException e) {
 
         }
         try {
-            if (KBMap[l.i - 1][l.j].safe || KBMap[l.i - 1][l.j].visited){
+            if (KBMap[l.i - 1][l.j].safe || KBMap[l.i - 1][l.j].visited) {
                 Location adj = new Location(l.i - 1, l.j);
+                adj.dir = 4;
                 adjacents.add(adj);
             }
         } catch (IndexOutOfBoundsException e) {
 
         }
         try {
-            if (KBMap[l.i][l.j + 1].safe || KBMap[l.i][l.j + 1].visited){
-                 Location adj = new Location(l.i, l.j + 1);
+            if (KBMap[l.i][l.j + 1].safe || KBMap[l.i][l.j + 1].visited) {
+                Location adj = new Location(l.i, l.j + 1);
+                adj.dir = 3;
                 adjacents.add(adj);
             }
         } catch (IndexOutOfBoundsException e) {
 
         }
         try {
-            if (KBMap[l.i][l.j - 1].safe || KBMap[l.i][l.j - 1].visited){
-                 Location adj = new Location(l.i, l.j - 1);
+            if (KBMap[l.i][l.j - 1].safe || KBMap[l.i][l.j - 1].visited) {
+                Location adj = new Location(l.i, l.j - 1);
+                adj.dir = 1;
                 adjacents.add(adj);
             }
         } catch (IndexOutOfBoundsException e) {
 
-        }        
-        
+        }
+
         return adjacents;
     }
-    
-    
-    
+
     public boolean rightDirection(Location ag, int dir, Location w) { //check if the agent is pointing towards the wumpus 
         if (ag.i < w.i && ag.j == w.j) { //if agent is left of wumpus
             if (dir == 2) {
@@ -223,9 +272,9 @@ public class KnowledgeBase {
         }
         return false;
     }
-    
-    public int whichDirection (Location ag, int dir, Location spot){
-        
+
+    public int whichDirection(Location ag, int dir, Location spot) { //returns the direction that points towards the desired location
+
         return dir;
     }
 

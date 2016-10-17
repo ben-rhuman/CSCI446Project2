@@ -10,7 +10,8 @@ public class Location {  //Class used for keeping track of Agent and wumpus loca
 
     public int i;
     public int j;
-
+    public int dir; //used only for adjacent squares and finding which direction a previous spot came from
+    
     public Location(int i, int j) {
         this.i = i;
         this.j = j;
@@ -20,4 +21,9 @@ public class Location {  //Class used for keeping track of Agent and wumpus loca
         this.i = i;
         this.j = j;
     }
+    
+    public void setDirection(int d){
+     dir = d;   
+    }
+
 }

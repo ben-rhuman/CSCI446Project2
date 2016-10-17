@@ -9,7 +9,7 @@ public class InferenceEngine {
     private KnowledgeBase KB;
     private Location agentLocation;
     private int agentDirection;
-    private ArrayList<Integer> plan = new ArrayList<Integer>();
+    private ArrayList<Integer> plan = new ArrayList<>();
 
     public InferenceEngine(int size) {
         KB = new KnowledgeBase(size);
@@ -45,7 +45,7 @@ public class InferenceEngine {
 
             if (planToHunt(w, agentDirection, agentLocation)) { //if we can make a plan to hunt the wumpus
 
-                KB.wump.remove(0); //remove it from the front
+                KB.wump.remove(0); //remove it from the front of the list
                 return;
             } else {
                 KB.wump.add(KB.wump.get(0)); //move that wumpus to the back of the list
@@ -59,10 +59,11 @@ public class InferenceEngine {
         
         //know when to update a spot to visited
         //make sure after it carries out the plan the adgents spot is updated
+        
         //if there is a smell/breeze we can check if there is only one possible choice left for the true pit/wumpus
         //other ways to infer pit or wumpus?        
         //set map breeze to false???/?
-        //if theres a pit move the agent back to its previous spot
+        //if theres a pit/wumpus move the agent back to its previous spot
         //check if we move into a wall
         //if we move into a wall?/obstacle, make sure don't move
         return;
@@ -70,47 +71,54 @@ public class InferenceEngine {
 
     private boolean planToHunt(Location w, int currentDir, Location currentLocation) { //recursively find a path to the wumpus
 
-        ArrayList<Location> adjacents = new ArrayList<Location>();
-        //create list of adjacents safe/visited
+        ArrayList<Location> adjacents;  //create list of adjacents safe/visited
+      
+        //try and stay in the same direction
+        ///////////////////keep track of which spots we have been to already
         adjacents = KB.returnSafeAdjacents(currentLocation);
 
-        if ((agentLocation.i == w.i || agentLocation.j == w.j) && !KB.obstacleInWay(agentLocation, w)) { //base case if can shoot wumpus
+        //order that list to have the directions that move closer to the wumpus first
+        adjacents = KB.orderDirection(adjacents, w, currentLocation);
+        
+        if ((currentLocation.i == w.i || currentLocation.j == w.j) && !KB.obstacleInWay(agentLocation, w)) { //base case if can shoot wumpus
 
-            int dir = agentDirection;
+            int dir = currentDir;
 
-            while (!KB.rightDirection(agentLocation, dir, w)) { //while the agent is not pointing towards the wumpus
+            while (!KB.rightDirection(currentLocation, dir, w)) { //fix the direction so the agent can point towards the wumpus
                 dir++;
                 plan.add(2);
             }
             plan.add(5);
             return true;
+            
         } else if (!adjacents.isEmpty()) { //the list is not empty
 
             for (int i = 0; i < adjacents.size(); i++) {
-                currentLocation.setLocation(adjacents.get(i).i, adjacents.get(i).j);
-                //set up current direction for next node
                 
-                if (planToHunt(adjacents.get(i),currentDir,currentLocation)) {
+                //setup the direction and current location for the next move
+                currentLocation.setLocation(adjacents.get(i).i, adjacents.get(i).j);
+                currentDir = adjacents.get(i).dir;
+                
+                
+                if (planToHunt(w,currentDir,adjacents.get(i))) {
                     
-                    int action = KB.whichDirection(currentLocation, currentDir, adjacents.get(i));
-                            
-                    //add actions to plan
-                            //if same direction, or if different
-                            //use the direction to tell you which spot to move fowards to
+                    //int action = KB.whichDirection(currentLocation, currentDir, adjacents.get(i));
+                         
                     return true;
                 }
+                
+                //remove the actions from the plan that did not take
+                
             }
             //make sure you do not move backwards
-            //need list of adjacent spots to current spot that are safe/visited, then use planToHunt for all of those
-            //make sure direction is taken into account
+            
         }
-        //build the path towards that wumpus, adding to plan
-        //possible infinite loops
+        
         return false;
     }
 
     private ArrayList planToExplore(int x, int y) {
-        ArrayList<Integer> plan = new ArrayList<Integer>();
+        ArrayList<Integer> plan = new ArrayList<>();
         return plan;
     }
 
