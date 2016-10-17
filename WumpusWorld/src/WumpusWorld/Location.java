@@ -15,4 +15,9 @@ public class Location {  //Class used for keeping track of Agent and wumpus loca
         this.i = i;
         this.j = j;
     }
+    
+    public void setLocation(int i, int j){
+        this.i = i;
+        this.j = j;
+    }
 }

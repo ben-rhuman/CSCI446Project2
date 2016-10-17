@@ -12,6 +12,7 @@ public class KBRoom {
     public boolean knownPit;
     public boolean possiblePit;
     public boolean obstacle;
+    public boolean visited;
     
     //percepts
     public boolean breeze;
@@ -27,6 +28,7 @@ public class KBRoom {
     knownPit = false;
     possiblePit = false;
     obstacle = false;
+    visited = false;
     
     //percepts
     breeze = false;
