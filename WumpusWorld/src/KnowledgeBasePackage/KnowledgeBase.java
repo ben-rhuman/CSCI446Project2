@@ -4,7 +4,6 @@ import WumpusWorld.*;
 import InferenceEnginePackage.*;
 import java.util.ArrayList;
 
-
 public class KnowledgeBase {
 
     public KBRoom[][] KBMap;
@@ -26,34 +25,93 @@ public class KnowledgeBase {
     }
 
     public void setSafe(int x, int y) {
-        KBMap[x][y].unknown = false;
-        KBMap[x][y].safe = true;
-        KBMap[x][y].possibleWumpus = false;
-        KBMap[x][y].possiblePit = false;
+
+        try {
+            KBMap[x][y].unknown = false;
+            KBMap[x][y].safe = true;
+            KBMap[x][y].kindaSafe = true;
+            KBMap[x][y].possibleWumpus = false;
+            KBMap[x][y].possiblePit = false;
+        } catch (IndexOutOfBoundsException e) {
+        }
     }
 
     public void setKnownPit(int x, int y) {
-        KBMap[x][y].unknown = false;
-        KBMap[x][y].knownPit = true;
-        KBMap[x][y].possibleWumpus = false;
-        KBMap[x][y].possiblePit = false;
+        try {
+            KBMap[x][y].unknown = false;
+            KBMap[x][y].knownPit = true;
+            KBMap[x][y].possibleWumpus = false;
+            KBMap[x][y].possiblePit = false;
+        } catch (IndexOutOfBoundsException e) {
+        }
+    }
+
+    public void setPossiblePit(int x, int y) {
+        try {
+            if (!KBMap[x][y].safe && !KBMap[x][y].kindaSafe && !KBMap[x][y].obstacle) {
+                KBMap[x][y].unknown = false;
+                KBMap[x][y].possiblePit = true;
+            }
+        } catch (IndexOutOfBoundsException e) {
+        }
     }
 
     public void setKnownWumpus(int x, int y) {
-        KBMap[x][y].unknown = false;
-        KBMap[x][y].knownWumpus = true;
-        KBMap[x][y].possibleWumpus = false;
-        KBMap[x][y].possiblePit = false;
+        try {
+            KBMap[x][y].unknown = false;
+            KBMap[x][y].knownWumpus = true;
+            KBMap[x][y].possibleWumpus = false;
+            KBMap[x][y].possiblePit = false;
 
-        Location l = new Location(x, y);
-        wump.add(l);
+            Location l = new Location(x, y);
+            wump.add(l);
+        } catch (IndexOutOfBoundsException e) {
+        }
+    }
+
+    public void setPossibleWumpus(int x, int y) {
+        try {
+            if (!KBMap[x][y].safe && !KBMap[x][y].kindaSafe && !KBMap[x][y].obstacle) {
+                KBMap[x][y].unknown = false;
+                KBMap[x][y].possibleWumpus = true;
+            }
+        } catch (IndexOutOfBoundsException e) {
+        }
     }
 
     public void setObstacle(int x, int y) {
-        KBMap[x][y].unknown = false;
-        KBMap[x][y].obstacle = true;
-        KBMap[x][y].possibleWumpus = false;
-        KBMap[x][y].possiblePit = false;
+        try {
+            KBMap[x][y].unknown = false;
+            KBMap[x][y].obstacle = true;
+            KBMap[x][y].possibleWumpus = false;
+            KBMap[x][y].possiblePit = false;
+        } catch (IndexOutOfBoundsException e) {
+        }
+    }
+
+    public void setKindaSafe(int x, int y) {
+        try {
+            setSafe(x, y); ///????????????????
+            KBMap[x][y].kindaSafe = true;
+            KBMap[x][y].safe = false;
+        } catch (IndexOutOfBoundsException e) {
+        }
+    }
+
+    public boolean checkSafe(int x, int y) {
+        try {
+            return KBMap[x][y].safe;
+        } catch (IndexOutOfBoundsException e) {
+            return false;
+        }
+    }
+
+    public boolean checkUnknown(int x, int y) {
+        try {
+            return KBMap[x][y].unknown; //True if unknown
+        } catch (IndexOutOfBoundsException e) {
+            return false;
+        }
     }
 
     public void removeWumpusStench(int x, int y) {
@@ -88,19 +146,19 @@ public class KnowledgeBase {
     ///==================Checking Knowlege Base for Inference Engine====================
     public boolean rightDirection(Location ag, int dir, Location w) { //check if the agent is pointing towards the wumpus 
         if (ag.i < w.i && ag.j == w.j) { //if agent is left of wumpus
-            if(dir == 2){
+            if (dir == 2) {
                 return true;
             }
         } else if (ag.i > w.i && ag.j == w.j) { //if agent is to the right of wumpus
-            if(dir == 4){
+            if (dir == 4) {
                 return true;
             }
         } else if (ag.j < w.j && ag.i == w.i) { //if agent is below wumpus
-            if(dir == 1){
+            if (dir == 1) {
                 return true;
             }
         } else if (ag.j > w.j && ag.i == w.i) { // if agent is above wumpus
-            if(dir == 3){
+            if (dir == 3) {
                 return true;
             }
         }

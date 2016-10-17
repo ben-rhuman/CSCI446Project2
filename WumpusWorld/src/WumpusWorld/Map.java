@@ -19,7 +19,6 @@ public class Map {
     private Room[][] world;      //world itself
     public int size;             //size of world   
     private List<Location> wumpusList = new ArrayList();
-    //public Location agentLocation = new Location(0, 0);
     private Location goldLocation;
 
     public Map(int size, double p, double obs, double w) {
@@ -267,7 +266,7 @@ public boolean[] checkPerceptAtLocation(Location loc){
         //true = scream
         //false = no scream
 
-        if (d == 1) {
+        if (d == 1) { //shoot arrow north
             for (int i = l.i; i >= 0; i--) {
                 if (world[i][l.j].getRoom() == 'o') {
                     return false;
@@ -277,7 +276,7 @@ public boolean[] checkPerceptAtLocation(Location loc){
                     return true;
                 }
             }
-        } else if (d == 2) {
+        } else if (d == 2) { //shoot arrow east
             for (int j = l.i; j < size; j++) {
                 if (world[l.i][j].getRoom() == 'o') {
                     return false;
@@ -287,7 +286,7 @@ public boolean[] checkPerceptAtLocation(Location loc){
                     return true;
                 }
             }
-        } else if (d == 3) {
+        } else if (d == 3) { //shoot arrow south
             for (int i = l.i; i < size; i++) {
                 if (world[i][l.j].getRoom() == 'o') {
                     return false;
