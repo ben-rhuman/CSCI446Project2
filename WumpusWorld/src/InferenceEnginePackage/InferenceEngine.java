@@ -10,6 +10,7 @@ public class InferenceEngine {
     private Location agentLocation;
     private int agentDirection;
     private ArrayList<Integer> plan = new ArrayList<>();
+    ArrayList<Location> tempVisited = new ArrayList<>();
 
     public InferenceEngine(int size) {
         KB = new KnowledgeBase(size);
@@ -35,6 +36,7 @@ public class InferenceEngine {
         //(3) forward
         //(4) grab
         //(5) shoot
+        
         if (KB.getRoomState(agentLocation.i, agentLocation.j).glitter) { //if the agent is near gold
             plan.add(4);
             return;
@@ -49,10 +51,12 @@ public class InferenceEngine {
                 return;
             } else {
                 KB.wump.add(KB.wump.get(0)); //move that wumpus to the back of the list
-                KB.wump.remove(0);
+                KB.wump.remove(0);           //** probably dont need all this
                 plan.clear();
             }
         }
+        
+        
 
         //potentially shoot if there is no other choice?
         //otherwise we plan to move to an unvisited spot
@@ -72,20 +76,20 @@ public class InferenceEngine {
     private boolean planToHunt(Location w, int currentDir, Location currentLocation) { //recursively find a path to the wumpus
 
         ArrayList<Location> adjacents;  //create list of adjacents safe/visited
-      
-        //try and stay in the same direction
-        ///////////////////keep track of which spots we have been to already
-        adjacents = KB.returnSafeAdjacents(currentLocation);
+        ArrayList<Integer> turnPlan;
+
+        //update list of spots we have already been
+        tempVisited.add(currentLocation);
+        
+        adjacents = KB.returnSafeAdjacents(currentLocation,tempVisited);
 
         //order that list to have the directions that move closer to the wumpus first
         adjacents = KB.orderDirection(adjacents, w, currentLocation);
         
-        if ((currentLocation.i == w.i || currentLocation.j == w.j) && !KB.obstacleInWay(agentLocation, w)) { //base case if can shoot wumpus
+        if ((currentLocation.i == w.i || currentLocation.j == w.j) && !KB.obstacleInWay(currentLocation, w)) { //base case if can shoot wumpus
 
-            int dir = currentDir;
-
-            while (!KB.rightDirection(currentLocation, dir, w)) { //fix the direction so the agent can point towards the wumpus
-                dir++;
+            while (!KB.rightDirection(currentLocation, currentDir, w)) { //fix the direction so the agent can point towards the wumpus
+                currentDir++;
                 plan.add(2);
             }
             plan.add(5);
@@ -95,27 +99,38 @@ public class InferenceEngine {
 
             for (int i = 0; i < adjacents.size(); i++) {
                 
-                //setup the direction and current location for the next move
+                //setup the direction and current location for the next potential move
                 currentLocation.setLocation(adjacents.get(i).i, adjacents.get(i).j);
-                currentDir = adjacents.get(i).dir;
                 
+                
+                turnPlan = KB.getTurnPlan(currentDir,adjacents.get(i).dir);
+                
+                for(int j = 0; j < turnPlan.size(); j++){ //add these turns to the plan
+                    plan.add(turnPlan.get(j));
+                }
+                plan.add(3); //move forward 
+                
+                currentDir = adjacents.get(i).dir; //set up curDir after it was used
+                //** keep track of profit
                 
                 if (planToHunt(w,currentDir,adjacents.get(i))) {
-                    
-                    //int action = KB.whichDirection(currentLocation, currentDir, adjacents.get(i));
-                         
                     return true;
+                    
+                } else{ //remove the actions if the plan failed
+                    for(int j = 0; j <= turnPlan.size(); j++){ //extra iteration for single forward action
+                    plan.remove(plan.size()-1);
+                    }
+                    tempVisited.remove(plan.size()-1);
+                  //** put back profit
                 }
                 
-                //remove the actions from the plan that did not take
-                
             }
-            //make sure you do not move backwards
             
         }
         
         return false;
     }
+   
 
     private ArrayList planToExplore(int x, int y) {
         ArrayList<Integer> plan = new ArrayList<>();

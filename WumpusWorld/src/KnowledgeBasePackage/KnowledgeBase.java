@@ -159,91 +159,110 @@ public class KnowledgeBase {
         return KBMap[x][y];
     }
 
+    public boolean listContainsLocation(ArrayList<Location> tempVisited, Location l){
+        for(int i = 0; i < tempVisited.size(); i++){
+            if(tempVisited.get(i).i == l.i && tempVisited.get(i).j == l.j){
+                return true;
+            }
+        }
+        return false;
+    }
+    
     ///==================Checking Knowlege Base for Inference Engine====================
     public ArrayList orderDirection(ArrayList<Location> l, Location w, Location agent) {
 
         ArrayList<Location> ordered = new ArrayList<>();
         ArrayList<Location> temp = new ArrayList<>(); //to hold the "worse" adjacents to go to
-        
+
         for (int i = 0; i < l.size(); i++) { //if it is increasing add it to the new list and remove it from the old 
 
             switch (l.get(i).dir) {
                 case 1: //north
                     if ((w.j - (agent.j--)) > (w.j - agent.j)) {  //if the wumpus is north of the explorer then north is a progressive direction towards the wumpus
                         ordered.add(l.get(i));
-                    } else{
+                    } else {
                         temp.add(l.get(i));
                     }
                     break;
                 case 2: //east
                     if ((w.i - (agent.i++)) < (w.i - agent.i)) {
                         ordered.add(l.get(i));
-                    } else{
+                    } else {
                         temp.add(l.get(i));
                     }
                     break;
                 case 3: //south
                     if ((w.j - (agent.j++)) < (w.j - agent.j)) {
                         ordered.add(l.get(i));
-                    } else{
+                    } else {
                         temp.add(l.get(i));
                     }
                     break;
                 default: //west
                     if ((w.i - (agent.i--)) > (w.i - agent.i)) {
                         ordered.add(l.get(i));
-                    } else{
+                    } else {
                         temp.add(l.get(i));
                     }
                     break;
-            }       
+            }
         }
-        
-         //add remaining non progressive adjacent spots to the list because we may still need them
-         for (int i = 0; i < temp.size(); i++) { 
-             ordered.add(l.get(i));
-         }
+
+        //add remaining non progressive adjacent spots to the list because we may still need them
+        for (int i = 0; i < temp.size(); i++) {
+            ordered.add(l.get(i));
+        }
 
         return ordered;
     }
 
-    public ArrayList returnSafeAdjacents(Location l) { //or return visited ones
+    public ArrayList returnSafeAdjacents(Location l, ArrayList<Location> tempVisited) { //or return visited ones, and not ones previously used for the plan
         ArrayList<Location> adjacents = new ArrayList<>();
 
         try {
 
-            if (KBMap[l.i + 1][l.j].safe || KBMap[l.i + 1][l.j].visited) {
+            if (KBMap[l.i + 1][l.j].safe || KBMap[l.i + 1][l.j].visited || KBMap[l.i + 1][l.j].kindaSafe) {
+                
                 Location adj = new Location(l.i + 1, l.j);
+                if(!listContainsLocation(tempVisited, adj)){
                 adj.dir = 2;
                 adjacents.add(adj);
+                }
+                
 
             }
         } catch (IndexOutOfBoundsException e) {
 
         }
         try {
-            if (KBMap[l.i - 1][l.j].safe || KBMap[l.i - 1][l.j].visited) {
+            if (KBMap[l.i - 1][l.j].safe || KBMap[l.i - 1][l.j].visited || KBMap[l.i + 1][l.j].kindaSafe) {
                 Location adj = new Location(l.i - 1, l.j);
+                if(!listContainsLocation(tempVisited, adj)){
                 adj.dir = 4;
                 adjacents.add(adj);
+                }
             }
         } catch (IndexOutOfBoundsException e) {
 
         }
         try {
-            if (KBMap[l.i][l.j + 1].safe || KBMap[l.i][l.j + 1].visited) {
+            if (KBMap[l.i][l.j + 1].safe || KBMap[l.i][l.j + 1].visited || KBMap[l.i + 1][l.j].kindaSafe) {
                 Location adj = new Location(l.i, l.j + 1);
+                if(!listContainsLocation(tempVisited, adj)){
                 adj.dir = 3;
                 adjacents.add(adj);
+                }
             }
         } catch (IndexOutOfBoundsException e) {
 
         }
         try {
-            if (KBMap[l.i][l.j - 1].safe || KBMap[l.i][l.j - 1].visited) {
+            if (KBMap[l.i][l.j - 1].safe || KBMap[l.i][l.j - 1].visited || KBMap[l.i + 1][l.j].kindaSafe) {
                 Location adj = new Location(l.i, l.j - 1);
+                if(!listContainsLocation(tempVisited, adj)){
                 adj.dir = 1;
                 adjacents.add(adj);
+                }
             }
         } catch (IndexOutOfBoundsException e) {
 
@@ -273,9 +292,34 @@ public class KnowledgeBase {
         return false;
     }
 
-    public int whichDirection(Location ag, int dir, Location spot) { //returns the direction that points towards the desired location
+    public ArrayList getTurnPlan(int dir1, int dir2) {
+        ArrayList<Integer> turnPlan = new ArrayList<>();
+        if ((dir1%2 == 0) && (dir2%2 == 0)) { //if both even
+            turnPlan.add(2);
+            turnPlan.add(2);
+        } else if ((dir1%2 != 0) && (dir2%2 != 0)) { //if both odd
+            turnPlan.add(2);
+            turnPlan.add(2);
+        } else if (dir1 == 1) { //special case for 1
+            if(dir2 == 4){
+                turnPlan.add(1);
+            } else {
+                turnPlan.add(2);
+            }
+        } else if (dir1 == 4) { //special case for 4
+            if(dir2 == 1){
+                turnPlan.add(2);
+            } else {
+                turnPlan.add(1);
+            }
 
-        return dir;
+        } else if (dir1 > dir2) {
+            turnPlan.add(1);
+        } else if (dir2 > dir1) {
+            turnPlan.add(2);
+        }
+
+        return turnPlan;
     }
 
     public boolean obstacleInWay(Location ag, Location w) { //checks if theres an obstacle or unknown (potential obstacle) inbetween agent and wumpus
