@@ -11,15 +11,17 @@ public class InferenceEngine {
     private int agentDirection;
     private ArrayList<Integer> plan = new ArrayList<>();
     ArrayList<Location> tempVisited = new ArrayList<>();
+    private int arrowCount;
 
     public InferenceEngine(int size) {
         KB = new KnowledgeBase(size);
     }
 
-    public void TELL(boolean[] percept, Location location, int direction) {  // Allows tha agent to tell the IE about its percepts
+    public void TELL(boolean[] percept, Location location, int direction, int arrowCount) {  // Allows tha agent to tell the IE about its percepts
         agentLocation = location;
         agentDirection = direction;
-
+        this.arrowCount = arrowCount;
+        
         updateKnowledgeBase(percept);
     }
 
@@ -30,19 +32,19 @@ public class InferenceEngine {
     }
 
     private void PLAN() { //gives a list of actions for the agent to do 
-
+        
         //(1) turn left 
         //(2) turn right
         //(3) forward
         //(4) grab
         //(5) shoot
-        
         if (KB.getRoomState(agentLocation.i, agentLocation.j).glitter) { //if the agent is near gold
             plan.add(4);
             return;
         }
 
         if (!KB.wump.isEmpty()) { //if there is a known wumpus build a plan to kill it
+            ///** check if have arrows
             Location w = new Location(KB.wump.get(0).i, KB.wump.get(0).j);
 
             if (planToHunt(w, agentDirection, agentLocation)) { //if we can make a plan to hunt the wumpus
@@ -50,27 +52,83 @@ public class InferenceEngine {
                 KB.wump.remove(0); //remove it from the front of the list
                 return;
             } else {
+                System.out.println("this shouldnt happen");
                 KB.wump.add(KB.wump.get(0)); //move that wumpus to the back of the list
                 KB.wump.remove(0);           //** probably dont need all this
                 plan.clear();
             }
         }
         
+        KB.createUnvisited();
+        Location closestKindaSafe = KB.getClosestUnvisited(agentLocation);
         
-
+        if (planToExplore(closestKindaSafe, agentDirection, agentLocation)){
+            return;
+        }else{
+            System.out.println("wut");
+        }
+        
+        
+        //be forced to choose possible wumpus or possible pits
         //potentially shoot if there is no other choice?
         //otherwise we plan to move to an unvisited spot
-        
         //know when to update a spot to visited
         //make sure after it carries out the plan the adgents spot is updated
-        
         //if there is a smell/breeze we can check if there is only one possible choice left for the true pit/wumpus
-        //other ways to infer pit or wumpus?        
-        //set map breeze to false???/?
+        //other ways to infer pit or wumpus?
         //if theres a pit/wumpus move the agent back to its previous spot
         //check if we move into a wall
         //if we move into a wall?/obstacle, make sure don't move
         return;
+    }
+        private boolean planToExplore(Location closest, int currentDir, Location currentLocation) { //find a path to the nearest unvisited spot
+
+        ArrayList<Location> adjacents;  //create list of adjacents safe/visited
+        ArrayList<Integer> turnPlan;
+
+        //update list of spots we have already been
+        tempVisited.add(currentLocation);
+
+        adjacents = KB.returnSafeAdjacents(currentLocation, tempVisited);
+
+        //order that list to have the directions that move closer to the wumpus first
+        adjacents = KB.orderDirection(adjacents, closest, currentLocation);
+
+        if ((currentLocation.i == closest.i && currentLocation.j == closest.j)) { //base case if can shoot wumpus
+
+            return true;
+
+        } else if (!adjacents.isEmpty()) { //the list is not empty
+
+            for (int i = 0; i < adjacents.size(); i++) {
+
+                //setup the direction and current location for the next potential move
+                currentLocation.setLocation(adjacents.get(i).i, adjacents.get(i).j);
+
+                turnPlan = KB.getTurnPlan(currentDir, adjacents.get(i).dir);
+
+                for (int j = 0; j < turnPlan.size(); j++) { //add these turns to the plan
+                    plan.add(turnPlan.get(j));
+                }
+                plan.add(3); //move forward 
+
+                currentDir = adjacents.get(i).dir; //set up curDir after it was used
+
+                if (planToExplore(closest, currentDir, adjacents.get(i))) {
+                    return true;
+
+                } else { //remove the actions if the plan failed
+                    for (int j = 0; j <= turnPlan.size(); j++) { //extra iteration for single forward action
+                        plan.remove(plan.size() - 1);
+                    }
+                    tempVisited.remove(plan.size() - 1);
+                }
+
+            }
+
+        }
+
+        return false;
     }
 
     private boolean planToHunt(Location w, int currentDir, Location currentLocation) { //recursively find a path to the wumpus
@@ -80,12 +138,12 @@ public class InferenceEngine {
 
         //update list of spots we have already been
         tempVisited.add(currentLocation);
-        
-        adjacents = KB.returnSafeAdjacents(currentLocation,tempVisited);
+
+        adjacents = KB.returnSafeAdjacents(currentLocation, tempVisited);
 
         //order that list to have the directions that move closer to the wumpus first
         adjacents = KB.orderDirection(adjacents, w, currentLocation);
-        
+
         if ((currentLocation.i == w.i || currentLocation.j == w.j) && !KB.obstacleInWay(currentLocation, w)) { //base case if can shoot wumpus
 
             while (!KB.rightDirection(currentLocation, currentDir, w)) { //fix the direction so the agent can point towards the wumpus
@@ -94,47 +152,38 @@ public class InferenceEngine {
             }
             plan.add(5);
             return true;
-            
+
         } else if (!adjacents.isEmpty()) { //the list is not empty
 
             for (int i = 0; i < adjacents.size(); i++) {
-                
+
                 //setup the direction and current location for the next potential move
                 currentLocation.setLocation(adjacents.get(i).i, adjacents.get(i).j);
-                
-                
-                turnPlan = KB.getTurnPlan(currentDir,adjacents.get(i).dir);
-                
-                for(int j = 0; j < turnPlan.size(); j++){ //add these turns to the plan
+
+                turnPlan = KB.getTurnPlan(currentDir, adjacents.get(i).dir);
+
+                for (int j = 0; j < turnPlan.size(); j++) { //add these turns to the plan
                     plan.add(turnPlan.get(j));
                 }
                 plan.add(3); //move forward 
-                
-                currentDir = adjacents.get(i).dir; //set up curDir after it was used
-                //** keep track of profit
-                
-                if (planToHunt(w,currentDir,adjacents.get(i))) {
-                    return true;
-                    
-                } else{ //remove the actions if the plan failed
-                    for(int j = 0; j <= turnPlan.size(); j++){ //extra iteration for single forward action
-                    plan.remove(plan.size()-1);
-                    }
-                    tempVisited.remove(plan.size()-1);
-                  //** put back profit
-                }
-                
-            }
-            
-        }
-        
-        return false;
-    }
-   
 
-    private ArrayList planToExplore(int x, int y) {
-        ArrayList<Integer> plan = new ArrayList<>();
-        return plan;
+                currentDir = adjacents.get(i).dir; //set up curDir after it was used
+
+                if (planToHunt(w, currentDir, adjacents.get(i))) {
+                    return true;
+
+                } else { //remove the actions if the plan failed
+                    for (int j = 0; j <= turnPlan.size(); j++) { //extra iteration for single forward action
+                        plan.remove(plan.size() - 1);
+                    }
+                    tempVisited.remove(plan.size() - 1);
+                }
+
+            }
+
+        }
+
+        return false;
     }
 
 //(0)Move suceeded (True) move failed/wall (False)
@@ -155,9 +204,12 @@ public class InferenceEngine {
         boolean pit = percept[4];
         boolean wumpus = percept[5];
         boolean glitter = percept[6];
+        int x = agentLocation.i;
+        int y = agentLocation.j;
 
-        //the agent cannot be in the same spot as the obstacle
-        //are we going to call updateKnowledgeBase when we walk towards an obstacle
+           KB.KBMap[x][y].unknown = false;
+        //** the agent cannot be in the same spot as the obstacle
+        //** are we going to call updateKnowledgeBase when we walk towards an obstacle
         if (obstacle) {   //If the agent hits an obstacle we need to correct for the fact that that the agentLocation is different from the location of the space we our updating
             int xMod = 0;
             int yMod = 0;
@@ -170,28 +222,31 @@ public class InferenceEngine {
             } else {
                 xMod = -1;
             }
-            KB.KBMap[agentLocation.i + xMod][agentLocation.j + yMod].breeze = false;
+            
             KB.setObstacle(agentLocation.i + xMod, agentLocation.j + yMod);
-        } else if (pit) {
-            KB.setKnownPit(agentLocation.i, agentLocation.j);   //Agent is dead, but we still need to update the map
+        }  else if (pit) {
+            KB.setKnownPit(x, y);   //Agent is dead, but we still need to update the map
         } else if (wumpus) {
-            KB.setKnownWumpus(agentLocation.i, agentLocation.j);   //Agent is dead, still need to update map.
-        } else if (breezy && stinky) {
-            KB.KBMap[agentLocation.i][agentLocation.j].breeze = true;
-            KB.KBMap[agentLocation.i][agentLocation.j].stench = true;
-            KB.KBMap[agentLocation.i][agentLocation.j].kindaSafe = true;
-        } else if (breezy) {
-            KB.KBMap[agentLocation.i][agentLocation.j].breeze = true;
-            KB.KBMap[agentLocation.i][agentLocation.j].kindaSafe = true;
+            KB.setKnownWumpus(x, y);   //Agent is dead, still need to update map.
+        } 
+        
+        if (breezy) {
+            KB.KBMap[x][y].breeze = true;
+            
+            KB.KBMap[x][y].kindaSafe = true;
         } else if (stinky) {
-            KB.KBMap[agentLocation.i][agentLocation.j].stench = true;
-            KB.KBMap[agentLocation.i][agentLocation.j].kindaSafe = true;
-        } else { //Determines whether or not space can be marked as safe.
-            KB.setSafe(agentLocation.i, agentLocation.j);
+            KB.KBMap[x][y].stench = true;
+            KB.KBMap[x][y].kindaSafe = true;
+        } else if(!pit && !wumpus && !obstacle){ //Determines whether or not space can be marked as safe.
+            KB.setSafe(x, y);
+        }
+        
+        if(!pit && !wumpus && !obstacle){
+            KB.setKindaSafe(x, y);
         }
 
         if (glitter) {
-            KB.KBMap[agentLocation.i][agentLocation.j].glitter = true;
+            KB.KBMap[x][y].glitter = true;
         }
     }
 
@@ -234,7 +289,6 @@ public class InferenceEngine {
                     KB.setKindaSafe(i, j);
                 } else if (!KB.checkUnknown(i, j - 1) || !KB.checkUnknown(i, j + 1) || !KB.checkUnknown(i - 1, j) || !KB.checkUnknown(i + 1, j)) {
                     KB.setKnownPit(i, j);
-                    //make sure to set all other booleans to false?
 
                 }
             } else if (KB.KBMap[i][j].possibleWumpus) {
