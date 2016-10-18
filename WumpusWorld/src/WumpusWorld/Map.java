@@ -222,7 +222,7 @@ public boolean[] move(Location location, int direction){
 }
 
 public boolean[] checkPercepts(Room room){
-    boolean[] percept = new boolean[7];
+    boolean[] percept = new boolean[8];
     percept[0] = true;
 
     if(room.getRoom() == 'o'){
@@ -243,7 +243,7 @@ public boolean[] checkPercepts(Room room){
 
 public boolean[] checkPerceptAtLocation(Location loc){
     Room room = world[loc.i][loc.j];
-    boolean[] percept = new boolean[7];
+    boolean[] percept = new boolean[8];
     percept[0] = false;
 
     if(room.getRoom() == 'o'){
@@ -258,7 +258,7 @@ public boolean[] checkPerceptAtLocation(Location loc){
     }
     percept[2] = room.getBreeze();
     percept[3] = room.getStench();
-
+    percept[7] = false;
     return percept;
 }
 

@@ -44,7 +44,7 @@ public class InferenceEngine {
         }
 
         if (!KB.wump.isEmpty()) { //if there is a known wumpus build a plan to kill it
-            ///** check if have arrows
+            if(arrowCount != 0){
             Location w = new Location(KB.wump.get(0).i, KB.wump.get(0).j);
 
             if (planToHunt(w, agentDirection, agentLocation)) { //if we can make a plan to hunt the wumpus
@@ -57,6 +57,7 @@ public class InferenceEngine {
                 KB.wump.remove(0);           //** probably dont need all this
                 plan.clear();
             }
+          }
         }
         
         KB.createUnvisited();
@@ -193,9 +194,8 @@ public class InferenceEngine {
 //(4)New room is pit
 //(5)New room is wumpus
 //(6)New room is gold
+    //(7) Wumpus Scream
     public void updateKnowledgeBase(boolean[] percept) {
-
-        KB.KBMap[agentLocation.i][agentLocation.j].unknown = false;
 
         //Used for code readablity
         boolean obstacle = percept[1];
@@ -204,49 +204,104 @@ public class InferenceEngine {
         boolean pit = percept[4];
         boolean wumpus = percept[5];
         boolean glitter = percept[6];
+        boolean scream = percept[7];
         int x = agentLocation.i;
         int y = agentLocation.j;
 
-           KB.KBMap[x][y].unknown = false;
-        //** the agent cannot be in the same spot as the obstacle
-        //** are we going to call updateKnowledgeBase when we walk towards an obstacle
-        if (obstacle) {   //If the agent hits an obstacle we need to correct for the fact that that the agentLocation is different from the location of the space we our updating
-            int xMod = 0;
-            int yMod = 0;
-            if (agentDirection == 1) {
-                yMod = -1;
-            } else if (agentDirection == 2) {
-                xMod = 1;
-            } else if (agentDirection == 3) {
-                yMod = 1;
-            } else {
-                xMod = -1;
-            }
-            
-            KB.setObstacle(agentLocation.i + xMod, agentLocation.j + yMod);
-        }  else if (pit) {
-            KB.setKnownPit(x, y);   //Agent is dead, but we still need to update the map
-        } else if (wumpus) {
-            KB.setKnownWumpus(x, y);   //Agent is dead, still need to update map.
-        } 
-        
-        if (breezy) {
-            KB.KBMap[x][y].breeze = true;
-            
-            KB.KBMap[x][y].kindaSafe = true;
-        } else if (stinky) {
-            KB.KBMap[x][y].stench = true;
-            KB.KBMap[x][y].kindaSafe = true;
-        } else if(!pit && !wumpus && !obstacle){ //Determines whether or not space can be marked as safe.
-            KB.setSafe(x, y);
-        }
-        
-        if(!pit && !wumpus && !obstacle){
-            KB.setKindaSafe(x, y);
+        KB.KBMap[x][y].unknown = false;
+
+        if (scream) {
+            killWumpus(x, y);
         }
 
-        if (glitter) {
-            KB.KBMap[x][y].glitter = true;
+        if (!KB.KBMap[x][y].visited || !percept[0]) { //if previosuly visited we dont need to reupdate these, i think...
+            //the agent cannot be in the same spot as the obstacle
+            //are we going to call updateKnowledgeBase when we walk towards an obstacle
+            if (obstacle) {   //If the agent hits an obstacle we need to correct for the fact that that the agentLocation is different from the location of the space we our updating
+                int xMod = 0;
+                int yMod = 0;
+                if (agentDirection == 1) {
+                    yMod = -1;
+                } else if (agentDirection == 2) {
+                    xMod = 1;
+                } else if (agentDirection == 3) {
+                    yMod = 1;
+                } else {
+                    xMod = -1;
+                }
+                KB.setObstacle(x + xMod, y + yMod);
+            } else if (pit) {
+                KB.setKnownPit(x, y);   //Agent is dead, but we still need to update the map
+            } else if (wumpus) {
+                KB.setKnownWumpus(x, y);   //Agent is dead, still need to update map.
+            }
+
+            if (breezy) {
+                KB.KBMap[x][y].breeze = true;
+                KB.KBMap[x][y].kindaSafe = true;
+            } else if (stinky) {
+                KB.KBMap[x][y].stench = true;
+                KB.KBMap[x][y].kindaSafe = true;
+            } else if (!pit && !wumpus && !obstacle) { //Determines whether or not space can be marked as safe.
+                KB.setSafe(x, y);
+            }
+
+            if (!pit && !wumpus && !obstacle) {
+                KB.setKindaSafe(x, y);
+            }
+
+            if (glitter) {
+                KB.KBMap[x][y].glitter = true;
+            }
+        }
+        KB.KBMap[x][y].visited = true;
+    }
+
+    private void killWumpus(int x, int y) {
+        if (x >= 0 && x < KB.KBMap.length && y >= 0 && y < KB.KBMap.length) {
+            switch (agentDirection) {
+                case 1:
+                    if (KB.KBMap[x][y].knownWumpus || KB.KBMap[x][y].possibleWumpus) {
+                        KB.KBMap[x][y].knownWumpus = false;
+                        KB.setKindaSafe(x, y);
+                    } else {
+                        y--;
+                        killWumpus(x, y);
+                    }
+                    break;
+                case 2:
+                    if (KB.KBMap[x][y].knownWumpus || KB.KBMap[x][y].possibleWumpus) {
+                        KB.KBMap[x][y].knownWumpus = false;
+                        KB.setKindaSafe(x, y);
+                    } else {
+                        x++;
+                        killWumpus(x, y);
+                    }
+                    break;
+                case 3:
+                    if (KB.KBMap[x][y].knownWumpus || KB.KBMap[x][y].possibleWumpus) {
+                        KB.KBMap[x][y].knownWumpus = false;
+                        KB.setKindaSafe(x, y);
+                    } else {
+                        y++;
+                        killWumpus(x, y);
+                    }
+                    break;
+                case 4:
+                    if (KB.KBMap[x][y].knownWumpus || KB.KBMap[x][y].possibleWumpus) {
+                        KB.KBMap[x][y].knownWumpus = false;
+                        KB.setKindaSafe(x, y);
+                    } else {
+                        x--;
+                        killWumpus(x, y);
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return;
+        } else {
+            System.out.println("Failed to determine where wumpus was in the Knowledge Base.");
         }
     }
 
@@ -289,6 +344,7 @@ public class InferenceEngine {
                     KB.setKindaSafe(i, j);
                 } else if (!KB.checkUnknown(i, j - 1) || !KB.checkUnknown(i, j + 1) || !KB.checkUnknown(i - 1, j) || !KB.checkUnknown(i + 1, j)) {
                     KB.setKnownPit(i, j);
+                    //make sure to set all other booleans to false?
 
                 }
             } else if (KB.KBMap[i][j].possibleWumpus) {
@@ -300,5 +356,6 @@ public class InferenceEngine {
             }
         }
     }
-
 }
+
+

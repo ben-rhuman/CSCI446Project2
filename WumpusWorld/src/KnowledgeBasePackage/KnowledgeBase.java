@@ -87,6 +87,7 @@ public class KnowledgeBase {
     public void setPossiblePit(int x, int y) {
         try {
             if (!KBMap[x][y].safe && !KBMap[x][y].kindaSafe && !KBMap[x][y].obstacle) {
+                KBMap[x][y].unknown = false;
                 KBMap[x][y].kindaSafe = false;
                 KBMap[x][y].unknown = false;
                 KBMap[x][y].possiblePit = true;
@@ -111,6 +112,7 @@ public class KnowledgeBase {
     public void setPossibleWumpus(int x, int y) {
         try {
             if (!KBMap[x][y].safe && !KBMap[x][y].kindaSafe && !KBMap[x][y].obstacle) {
+                KBMap[x][y].unknown = false;
                 KBMap[x][y].kindaSafe = false;
                 KBMap[x][y].unknown = false;
                 KBMap[x][y].possibleWumpus = true;

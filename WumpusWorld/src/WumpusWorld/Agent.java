@@ -21,6 +21,7 @@ public class Agent {
     private int arrowCount;
     private Map worldMap;
     private InferenceEngine IE;
+    private boolean done;
     private boolean[] percept;
 //(0)Move suceeded (True) move failed/wall (False)
 //(1)New room obstacle
@@ -44,8 +45,9 @@ public class Agent {
 
 ////////////////////////// Game Execution Functions ////////////////////////////
     
+   
     private void playGame(){
-        boolean done = false;
+        done = false;
         ArrayList<Integer> plan;
         while(done != true){
             TELL();
@@ -67,15 +69,48 @@ public class Agent {
                 turnRight();
                 break;
             case 3: //(3) forward
-                move(); //THIS IS NOT ALL THAT IT DOES RIGHT HERE. JUST A PLACE HOLDER FOR NOW
+                percept = move(); //THIS IS NOT ALL THAT IT DOES RIGHT HERE. JUST A PLACE HOLDER FOR NOW
+                if(!percept[0] || percept[1]){ //If move failed (0) or obstacle (1) 
+                    //Leave location alone
+                } else{
+                    updateLocation();
+                }
                 break;
             case 4: //(4) grab
-                grab(); //THIS IS NOT ALL THAT IT DOES RIGHT HERE. JUST A PLACE HOLDER FOR NOW
+                if(grab()){
+                    win();
+                }
                 break;
             case 5: //(5) shoot
-                shootArrow(); //THIS IS NOT ALL THAT IT DOES RIGHT HERE. JUST A PLACE HOLDER FOR NOW
+                percept[7] = shootArrow();  //Updates the scream percept if a wumpus is killed
                 break;
         }
+        
+        plan.remove(0);
+        return executePlan(plan);
+    }
+    
+    
+    private void updateLocation(){
+        if(direction == 1){
+            currentLocation.j--;
+        } else if(direction == 2){
+            currentLocation.i++;
+        } else if (direction == 3){
+            currentLocation.j++;
+        } else{
+            currentLocation.i--;
+        }
+    }
+    
+    private void win(){
+        System.out.println("The Agent Found The Gold And Won!");
+        printStats();
+        done = true;
+    }
+    
+    private void printStats(){
+        
     }
     
 ////////////////////////// End Game Execution Functions ////////////////////////////
