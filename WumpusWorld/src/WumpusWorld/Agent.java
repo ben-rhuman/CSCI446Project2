@@ -11,7 +11,6 @@ import java.util.ArrayList;
  * Wumpus World using First Order Logic
  * Ben Rhuman, Danny Kumpf, Isaac Sotelo
  */
-
 public class Agent {
 
     private int payOff;
@@ -30,38 +29,36 @@ public class Agent {
 //(4)New room is pit
 //(5)New room is wumpus
 //(6)New room is gold
-     
+
     public Agent(int x, int y, int numGold, int direction, Map worldMap) {  //Direction in our case should always be 2 (i.e. East) at start.
         currentLocation.i = x;
         currentLocation.j = y;
         this.payOff = numGold;
         this.direction = direction;
         this.worldMap = worldMap;
-        
+
         IE = new InferenceEngine(worldMap.size);
-        
+
         percept = worldMap.checkPerceptAtLocation(currentLocation);
     }
 
 ////////////////////////// Game Execution Functions ////////////////////////////
-    
-   
-    private void playGame(){
+    private void playGame() {
         done = false;
         ArrayList<Integer> plan;
-        while(done != true){
+        while (done != true) {
             TELL();
             plan = ASK();
             executePlan(plan);
         }
     }
-    
-    private boolean executePlan(ArrayList<Integer> plan){
-        if(plan.isEmpty()){
+
+    private boolean executePlan(ArrayList<Integer> plan) {
+        if (plan.isEmpty()) {
             return true;
         }
 
-        switch ((int) plan.get(0)){
+        switch ((int) plan.get(0)) {
             case 1: //(1) turn left 
                 turnLeft();
                 break;
@@ -69,15 +66,15 @@ public class Agent {
                 turnRight();
                 break;
             case 3: //(3) forward
-                percept = move(); //THIS IS NOT ALL THAT IT DOES RIGHT HERE. JUST A PLACE HOLDER FOR NOW
-                if(!percept[0] || percept[1]){ //If move failed (0) or obstacle (1) 
+                percept = move();
+                if (!percept[0] || percept[1]) { //If move failed (0) or obstacle (1) 
                     //Leave location alone
-                } else{
+                } else {
                     updateLocation();
                 }
                 break;
             case 4: //(4) grab
-                if(grab()){
+                if (grab()) {
                     win();
                 }
                 break;
@@ -85,37 +82,34 @@ public class Agent {
                 percept[7] = shootArrow();  //Updates the scream percept if a wumpus is killed
                 break;
         }
-        
+
         plan.remove(0);
         return executePlan(plan);
     }
-    
-    
-    private void updateLocation(){
-        if(direction == 1){
+
+    private void updateLocation() {
+        if (direction == 1) {
             currentLocation.j--;
-        } else if(direction == 2){
+        } else if (direction == 2) {
             currentLocation.i++;
-        } else if (direction == 3){
+        } else if (direction == 3) {
             currentLocation.j++;
-        } else{
+        } else {
             currentLocation.i--;
         }
     }
-    
-    private void win(){
+
+    private void win() {
         System.out.println("The Agent Found The Gold And Won!");
         printStats();
         done = true;
     }
-    
-    private void printStats(){
-        
+
+    private void printStats() {
+
     }
-    
+
 ////////////////////////// End Game Execution Functions ////////////////////////////
-    
-    
 //////////////////////// Agent Action Methods //////////////////////////////////
     private boolean[] move() { //Moves the agent one space in the direction its facing.
         moveCounter++;
@@ -151,14 +145,21 @@ public class Agent {
             System.out.println(moveCounter + ": Could not shoot an arrow.");
             return false;
         }
+
         arrowCount--;
+        payOff -= 10; //shooting an arrow
         System.out.println(moveCounter + ": Shot an arrow.");
-        return worldMap.shootArrow(currentLocation, direction);
+        if (worldMap.shootArrow(currentLocation, direction)) {
+            payOff += 10; //killing a wumpus
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    private boolean grab(){
+    private boolean grab() {
         moveCounter++;
-        if(percept[6]){
+        if (percept[6]) {
             System.out.println(moveCounter + ": Grab gold.");
             return true;
         }
@@ -166,18 +167,13 @@ public class Agent {
         return false;
     }
 
-
-        //////////////////////// End Agent Action Methods //////////////////////////////////
-    
-    
-    
+    //////////////////////// End Agent Action Methods //////////////////////////////////
     //////////////////////////// Agent - Inference Engine Methods ////////////////////////////
-    
     private void TELL() {
-        IE.TELL(percept, currentLocation, direction,arrowCount);   // Tells the IE what the current percepts are
+        IE.TELL(percept, currentLocation, direction, arrowCount);   // Tells the IE what the current percepts are
     }
-    
-    private ArrayList ASK(){
+
+    private ArrayList ASK() {
         return IE.ASK();  //Asks the IE what move it should take. 
     }
 }

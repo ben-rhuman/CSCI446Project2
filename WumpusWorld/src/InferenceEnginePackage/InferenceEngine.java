@@ -21,7 +21,7 @@ public class InferenceEngine {
         agentLocation = location;
         agentDirection = direction;
         this.arrowCount = arrowCount;
-        
+
         updateKnowledgeBase(percept);
     }
 
@@ -32,7 +32,7 @@ public class InferenceEngine {
     }
 
     private void PLAN() { //gives a list of actions for the agent to do 
-        
+
         //(1) turn left 
         //(2) turn right
         //(3) forward
@@ -44,45 +44,43 @@ public class InferenceEngine {
         }
 
         if (!KB.wump.isEmpty()) { //if there is a known wumpus build a plan to kill it
-            if(arrowCount != 0){
-            Location w = new Location(KB.wump.get(0).i, KB.wump.get(0).j);
+            if (arrowCount != 0) {
+                Location w = new Location(KB.wump.get(0).i, KB.wump.get(0).j);
 
-            if (planToHunt(w, agentDirection, agentLocation)) { //if we can make a plan to hunt the wumpus
+                if (planToHunt(w, agentDirection, agentLocation)) { //if we can make a plan to hunt the wumpus
 
-                KB.wump.remove(0); //remove it from the front of the list
+                    KB.wump.remove(0); //remove it from the front of the list
+                    return;
+                } else {
+                    System.out.println("this shouldnt happen");
+                    plan.clear();
+                }
+            }
+        }
+
+        KB.createDesiredSpots(1); //spots that are unvisited and kindaSafe
+        Location closestDesiredSpot = KB.getClosestDesiredSpot(agentLocation);
+
+        if (planToExplore(closestDesiredSpot, agentDirection, agentLocation)) {
+            return;
+        } else {
+            plan.clear();
+            KB.createDesiredSpots(2); //spots that are unvisited
+            Location closestDesiredSpot2 = KB.getClosestDesiredSpot(agentLocation);
+
+            if (planToExplore(closestDesiredSpot2, agentDirection, agentLocation)) {
                 return;
             } else {
-                System.out.println("this shouldnt happen");
-                KB.wump.add(KB.wump.get(0)); //move that wumpus to the back of the list
-                KB.wump.remove(0);           //** probably dont need all this
-                plan.clear();
+                System.out.println("cant get to unvisited spot/trapped?");
             }
-          }
         }
-        
-        KB.createUnvisited();
-        Location closestKindaSafe = KB.getClosestUnvisited(agentLocation);
-        
-        if (planToExplore(closestKindaSafe, agentDirection, agentLocation)){
-            return;
-        }else{
-            System.out.println("wut");
-        }
-        
-        
-        //be forced to choose possible wumpus or possible pits
+
         //potentially shoot if there is no other choice?
-        //otherwise we plan to move to an unvisited spot
-        //know when to update a spot to visited
         //make sure after it carries out the plan the adgents spot is updated
-        //if there is a smell/breeze we can check if there is only one possible choice left for the true pit/wumpus
         //other ways to infer pit or wumpus?
-        //if theres a pit/wumpus move the agent back to its previous spot
-        //check if we move into a wall
-        //if we move into a wall?/obstacle, make sure don't move
-        return;
     }
-        private boolean planToExplore(Location closest, int currentDir, Location currentLocation) { //find a path to the nearest unvisited spot
+
+    private boolean planToExplore(Location closest, int currentDir, Location currentLocation) { //find a path to the nearest desiredSpots spot
 
         ArrayList<Location> adjacents;  //create list of adjacents safe/visited
         ArrayList<Integer> turnPlan;
@@ -215,8 +213,7 @@ public class InferenceEngine {
         }
 
         if (!KB.KBMap[x][y].visited || !percept[0]) { //if previosuly visited we dont need to reupdate these, i think...
-            //the agent cannot be in the same spot as the obstacle
-            //are we going to call updateKnowledgeBase when we walk towards an obstacle
+
             if (obstacle) {   //If the agent hits an obstacle we need to correct for the fact that that the agentLocation is different from the location of the space we our updating
                 int xMod = 0;
                 int yMod = 0;
@@ -337,14 +334,13 @@ public class InferenceEngine {
             } else if (KB.KBMap[i][j].stench) { //Marks possible wumpus
                 KB.setPossibleWumpus(i, j - 1);
                 KB.setPossibleWumpus(i, j + 1);
-                KB.setPossibleWumpus(i - 1, j);
-                KB.setPossibleWumpus(i + 1, j);
+                KB.setPossibleWumpus(i - 1, j);//if you set the data you won't be able to infer the pit/wumpus till the next round
+                KB.setPossibleWumpus(i + 1, j);//the one below should be an if statement?
             } else if (KB.KBMap[i][j].possiblePit) { //Try to debunk or confirm possible pit
                 if (KB.checkSafe(i, j - 1) || KB.checkSafe(i, j + 1) || KB.checkSafe(i - 1, j) || KB.checkSafe(i + 1, j)) {
                     KB.setKindaSafe(i, j);
                 } else if (!KB.checkUnknown(i, j - 1) || !KB.checkUnknown(i, j + 1) || !KB.checkUnknown(i - 1, j) || !KB.checkUnknown(i + 1, j)) {
                     KB.setKnownPit(i, j);
-                    //make sure to set all other booleans to false?
 
                 }
             } else if (KB.KBMap[i][j].possibleWumpus) {
@@ -357,5 +353,3 @@ public class InferenceEngine {
         }
     }
 }
-
-

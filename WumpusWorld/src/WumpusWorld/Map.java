@@ -1,13 +1,8 @@
 package WumpusWorld;
 
-
-
 /**
- * Wumpus World using First Order Logic
- * Ben Rhuman, Danny Kumpf, Isaac Sotelo
+ * Wumpus World using First Order Logic Ben Rhuman, Danny Kumpf, Isaac Sotelo
  */
-
-
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,10 +29,7 @@ public class Map {
 
     }
 
-    
-    
 /////////////////////MAP SETUP////////////////////////////
-
     public void initiateRooms() {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
@@ -108,8 +100,6 @@ public class Map {
     }
 
 /////////////////End MAP SETUP///////////////////////////////////
-
-
     public void removeWumpus(int i, int j) {
 
         world[i][j].setRoom('e'); //changing the wumpus on the map
@@ -139,9 +129,7 @@ public class Map {
 
     }
 
-
 /////////////Setting Methods///////////////////////
-
     public void setStench(int i, int j) {
         try {
             world[i + 1][j].setStench();
@@ -191,76 +179,75 @@ public class Map {
     }
 
 ///////////////////End Setting Methods//////////////////////////////
-
-
 /////////////////////Agent Interfacing Methods//////////////////////
-
-public boolean[] move(Location location, int direction){
-    boolean[] percept = {
-        false, //(0)Move suceeded (True) move failed/wall (False)
-        false, //(1)New room obstacle
-        false, //(2)New room is breezy room 
-        false, //(3)New room is stinky room
-        false, //(4)New room is pit
-        false, //(5)New room is wumpus
-        false //(6)New room is gold
-    };
-    try{
-        if(direction == 1){
-            percept = checkPercepts(world[location.i][location.j-1]);
-        }else if(direction == 2){
-            percept = checkPercepts(world[location.i+1][location.j]);
-        }else if(direction == 3){
-            percept = checkPercepts(world[location.i][location.j+1]);
-        }else{
-            percept = checkPercepts(world[location.i-1][location.j]);
+    public boolean[] move(Location location, int direction) {
+        boolean[] percept = {
+            false, //(0)Move suceeded (True) move failed/wall (False)
+            false, //(1)New room obstacle
+            false, //(2)New room is breezy room 
+            false, //(3)New room is stinky room
+            false, //(4)New room is pit
+            false, //(5)New room is wumpus
+            false //(6)New room is gold
+        };
+        try {
+            if (direction == 1) {
+                percept = checkPercepts(world[location.i][location.j - 1]);
+            } else if (direction == 2) {
+                percept = checkPercepts(world[location.i + 1][location.j]);
+            } else if (direction == 3) {
+                percept = checkPercepts(world[location.i][location.j + 1]);
+            } else {
+                percept = checkPercepts(world[location.i - 1][location.j]);
+            }
+        } catch (IndexOutOfBoundsException e) {
+            percept[0] = false;
         }
-    }catch(IndexOutOfBoundsException e){
+        return percept;
+    }
+
+    public boolean[] checkPercepts(Room room) {
+        boolean[] percept = new boolean[8];
+        percept[0] = true;
+
+        if (room.getRoom() == 'o') {
+            percept[1] = true;
+            percept[0] = false;
+        } else if (room.getRoom() == 'p') {
+            percept[0] = false;
+            percept[4] = true;
+        } else if (room.getRoom() == 'w') {
+            percept[0] = false;
+            percept[5] = true;
+        } else if (room.getRoom() == 'g') {
+            percept[6] = true;
+        }
+        percept[2] = room.getBreeze();
+        percept[3] = room.getStench();
+
+        return percept;
+    }
+
+    public boolean[] checkPerceptAtLocation(Location loc) {
+        Room room = world[loc.i][loc.j];
+        boolean[] percept = new boolean[8];
         percept[0] = false;
-    }  
-    return percept;
-}
 
-public boolean[] checkPercepts(Room room){
-    boolean[] percept = new boolean[8];
-    percept[0] = true;
-
-    if(room.getRoom() == 'o'){
-        percept[1] = true;
-         percept[0] = false;
-    } else if(room.getRoom() == 'p'){
-        percept[4] = true;
-    } else if(room.getRoom() == 'w'){
-        percept[5] = true;
-    }else if(room.getRoom() == 'g'){
-        percept[6] = true;
+        if (room.getRoom() == 'o') {
+            percept[1] = true;
+            percept[0] = false;
+        } else if (room.getRoom() == 'p') {
+            percept[4] = true;
+        } else if (room.getRoom() == 'w') {
+            percept[5] = true;
+        } else if (room.getRoom() == 'g') {
+            percept[6] = true;
+        }
+        percept[2] = room.getBreeze();
+        percept[3] = room.getStench();
+        percept[7] = false;
+        return percept;
     }
-    percept[2] = room.getBreeze();
-    percept[3] = room.getStench();
-
-    return percept;
-}
-
-public boolean[] checkPerceptAtLocation(Location loc){
-    Room room = world[loc.i][loc.j];
-    boolean[] percept = new boolean[8];
-    percept[0] = false;
-
-    if(room.getRoom() == 'o'){
-        percept[1] = true;
-         percept[0] = false;
-    } else if(room.getRoom() == 'p'){
-        percept[4] = true;
-    } else if(room.getRoom() == 'w'){
-        percept[5] = true;
-    }else if(room.getRoom() == 'g'){
-        percept[6] = true;
-    }
-    percept[2] = room.getBreeze();
-    percept[3] = room.getStench();
-    percept[7] = false;
-    return percept;
-}
 
     public boolean shootArrow(Location l, int d) {
         //true = scream
@@ -310,10 +297,7 @@ public boolean[] checkPerceptAtLocation(Location loc){
         return false;
     }
 
-
 /////////////////End Agent Interfacing Methods//////////////////////
-
-
     public void print() {
 
         for (int i = 0; i < size; i++) {
@@ -324,19 +308,17 @@ public boolean[] checkPerceptAtLocation(Location loc){
             System.out.println("");
         }
     }
-    
-    
+
     public void printAttributes() {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
 
-                System.out.println("Spot" + j + ", "+ i);
-                System.out.println("breeze?"+world[j][i].getBreeze());
-                System.out.println("stench?"+world[j][i].getStench());
-                System.out.println("glitter?"+world[j][i].getGlitter());
+                System.out.println("Spot" + j + ", " + i);
+                System.out.println("breeze?" + world[j][i].getBreeze());
+                System.out.println("stench?" + world[j][i].getStench());
+                System.out.println("glitter?" + world[j][i].getGlitter());
             }
             System.out.println("");
         }
     }
 }
-

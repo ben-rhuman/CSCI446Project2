@@ -9,7 +9,7 @@ public class KnowledgeBase {
     public KBRoom[][] KBMap;
     public ArrayList<Location> wump = new ArrayList<>();
     public ArrayList<Location> safe = new ArrayList<>();
-    public ArrayList<Location> unvisited = new ArrayList<>();
+    public ArrayList<Location> desiredSpots = new ArrayList<>();
 
     public KnowledgeBase(int worldSize) {
         KBMap = new KBRoom[worldSize][worldSize];
@@ -18,41 +18,50 @@ public class KnowledgeBase {
                 KBMap[i][j] = new KBRoom();  //Initialized the KBMap to the starting state.
             }
         }
-        
+
     }
 
-    public void createUnvisited(){
+    public void createDesiredSpots(int type) {
+
+        desiredSpots.clear();
+
         for (int i = 0; i < KBMap.length; i++) {
             for (int j = 0; j < KBMap[i].length; j++) {
-                Location l = new Location(i,j);
-                if(!KBMap[i][j].unknown){
-                    if(!KBMap[i][j].visited && KBMap[i][j].kindaSafe){
-                        unvisited.add(l);
+                Location l = new Location(i, j);
+                if (!KBMap[i][j].unknown) {
+                    if (type == 1) {
+                        if (!KBMap[i][j].visited && KBMap[i][j].kindaSafe) {
+                            desiredSpots.add(l);
+                        }
+                    } else if (type == 2) {
+                        if (!KBMap[i][j].visited) {
+                            desiredSpots.add(l);
+                        }
                     }
                 }
             }
         }
     }
-    public int unvisitedIndexOf(Location l){
+
+    public int desiredSpotsIndexOf(Location l) {
         int index = 0;
-        for(int i = 0; i < unvisited.size(); i++){
-            if (unvisited.get(i).i == l.i && unvisited.get(i).j == l.j){
+        for (int i = 0; i < desiredSpots.size(); i++) {
+            if (desiredSpots.get(i).i == l.i && desiredSpots.get(i).j == l.j) {
                 index = i;
                 return index;
             }
         }
         return index;
     }
-    
+
     public void setVisited(int x, int y) {
         try {
             KBMap[x][y].unknown = false;
             KBMap[x][y].visited = false;
 
             Location l = new Location(x, y);
-            int index = unvisitedIndexOf(l);
-            unvisited.remove(index);
-            
+            //int index = desiredSpotsIndexOf(l);
+            //desiredSpots.remove(index);
 
         } catch (IndexOutOfBoundsException e) {
         }
@@ -140,11 +149,9 @@ public class KnowledgeBase {
         } catch (IndexOutOfBoundsException e) {
         }
     }
-    
-    /////////////////////////////// End Setting Methods /////////////////////////////////
-    
-    /////////////////////////////// Checking Methods /////////////////////////////////
 
+    /////////////////////////////// End Setting Methods /////////////////////////////////
+    /////////////////////////////// Checking Methods /////////////////////////////////
     public boolean checkSafe(int x, int y) {
         try {
             return KBMap[x][y].safe;
@@ -160,11 +167,12 @@ public class KnowledgeBase {
             return false;
         }
     }
-    
+
     public KBRoom getRoomState(int x, int y) {
         return KBMap[x][y];
     }
 /////////////////////////////// Checking Methods /////////////////////////////////
+
     public void removeWumpusStench(int x, int y) {
 
         try {
@@ -190,8 +198,6 @@ public class KnowledgeBase {
 
     }
 
-    
-
     public boolean listContainsLocation(ArrayList<Location> tempVisited, Location l) {
         for (int i = 0; i < tempVisited.size(); i++) {
             if (tempVisited.get(i).i == l.i && tempVisited.get(i).j == l.j) {
@@ -202,29 +208,29 @@ public class KnowledgeBase {
     }
 
     ///==================Checking Knowlege Base from Inference Engine====================
-    public Location getClosestUnvisited(Location current){
-        Location currentClosest = unvisited.get(0);
+    public Location getClosestDesiredSpot(Location current) {
+        Location currentClosest = desiredSpots.get(0);
         double currentDistance = Double.MAX_VALUE;
-        
-        for(int i = 0; i < unvisited.size(); i++){
-            
-            double x1 = (double)current.i;
-            double y1 = (double)current.j;
-            
-            double x2 = (double)unvisited.get(i).i;
-            double y2 = (double)unvisited.get(i).j;
-            
-            double distance2 = Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
-            
-            if(distance2 <= currentDistance){
+
+        for (int i = 0; i < desiredSpots.size(); i++) {
+
+            double x1 = (double) current.i;
+            double y1 = (double) current.j;
+
+            double x2 = (double) desiredSpots.get(i).i;
+            double y2 = (double) desiredSpots.get(i).j;
+
+            double distance2 = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+
+            if (distance2 <= currentDistance) {
                 currentDistance = distance2;
-                currentClosest = unvisited.get(i);
+                currentClosest = desiredSpots.get(i);
             }
-            
+
         }
         return currentClosest;
     }
-    
+
     public ArrayList orderDirection(ArrayList<Location> l, Location w, Location agent) {
 
         ArrayList<Location> ordered = new ArrayList<>();
@@ -276,47 +282,53 @@ public class KnowledgeBase {
         ArrayList<Location> adjacents = new ArrayList<>();
 
         try {
+            if (KBMap[l.i + 1][l.j].knownWumpus && KBMap[l.i + 1][l.j].knownPit) {
+                if (KBMap[l.i + 1][l.j].safe || KBMap[l.i + 1][l.j].visited) {
 
-            if (KBMap[l.i + 1][l.j].safe || KBMap[l.i + 1][l.j].visited) {
-
-                Location adj = new Location(l.i + 1, l.j);
-                if (!listContainsLocation(tempVisited, adj)) {
-                    adj.dir = 2;
-                    adjacents.add(adj);
-                }
-
-            }
-        } catch (IndexOutOfBoundsException e) {
-
-        }
-        try {
-            if (KBMap[l.i - 1][l.j].safe || KBMap[l.i - 1][l.j].visited ) {
-                Location adj = new Location(l.i - 1, l.j);
-                if (!listContainsLocation(tempVisited, adj)) {
-                    adj.dir = 4;
-                    adjacents.add(adj);
+                    Location adj = new Location(l.i + 1, l.j);
+                    if (!listContainsLocation(tempVisited, adj)) {
+                        adj.dir = 2;
+                        adjacents.add(adj);
+                    }
                 }
             }
         } catch (IndexOutOfBoundsException e) {
 
         }
         try {
-            if (KBMap[l.i][l.j + 1].safe || KBMap[l.i][l.j + 1].visited ) {
-                Location adj = new Location(l.i, l.j + 1);
-                if (!listContainsLocation(tempVisited, adj)) {
-                    adj.dir = 3;
-                    adjacents.add(adj);
+            if (KBMap[l.i - 1][l.j].knownWumpus && KBMap[l.i - 1][l.j].knownPit) {
+                if (KBMap[l.i - 1][l.j].safe || KBMap[l.i - 1][l.j].visited) {
+                    Location adj = new Location(l.i - 1, l.j);
+                    if (!listContainsLocation(tempVisited, adj)) {
+                        adj.dir = 4;
+                        adjacents.add(adj);
+                    }
                 }
             }
         } catch (IndexOutOfBoundsException e) {
 
         }
         try {
-            if (KBMap[l.i][l.j - 1].safe || KBMap[l.i][l.j - 1].visited ) {
-                Location adj = new Location(l.i, l.j - 1);
-                if (!listContainsLocation(tempVisited, adj)) {
-                    adj.dir = 1;
-                    adjacents.add(adj);
+            if (KBMap[l.i][l.j + 1].knownWumpus && KBMap[l.i][l.j + 1].knownPit) {
+                if (KBMap[l.i][l.j + 1].safe || KBMap[l.i][l.j + 1].visited) {
+                    Location adj = new Location(l.i, l.j + 1);
+                    if (!listContainsLocation(tempVisited, adj)) {
+                        adj.dir = 3;
+                        adjacents.add(adj);
+                    }
+                }
+            }
+        } catch (IndexOutOfBoundsException e) {
+
+        }
+        try {
+            if (KBMap[l.i][l.j - 1].knownWumpus && KBMap[l.i][l.j - 1].knownPit) {
+                if (KBMap[l.i][l.j - 1].safe || KBMap[l.i][l.j - 1].visited) {
+                    Location adj = new Location(l.i, l.j - 1);
+                    if (!listContainsLocation(tempVisited, adj)) {
+                        adj.dir = 1;
+                        adjacents.add(adj);
+                    }
                 }
             }
         } catch (IndexOutOfBoundsException e) {
