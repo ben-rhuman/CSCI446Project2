@@ -57,7 +57,7 @@ public class InferenceEngine {
                 }
             }
         }
-
+        // ** iterate through the entire list of potential spots?
         KB.createDesiredSpots(1); //spots that are unvisited and kindaSafe
         Location closestDesiredSpot = KB.getClosestDesiredSpot(agentLocation);
 
