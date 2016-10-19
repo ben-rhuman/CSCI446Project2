@@ -30,7 +30,7 @@ public class KnowledgeBase {
                 Location l = new Location(i, j);
                 if (!KBMap[i][j].unknown) {
                     if (type == 1) {
-                        if (!KBMap[i][j].visited && KBMap[i][j].kindaSafe) {
+                        if (!KBMap[i][j].visited && KBMap[i][j].kindaSafe && !KBMap[i][j].obstacle) {
                             desiredSpots.add(l);
                         }
                     } else if (type == 2) {
@@ -349,20 +349,20 @@ public class KnowledgeBase {
         return adjacents;
     }
 
-    public boolean rightDirection(Location ag, int dir, Location w) { //check if the agent is pointing towards the wumpus 
-        if (ag.i < w.i && ag.j == w.j) { //if agent is left of wumpus
+    public boolean rightDirection(Location ag, int dir, Location spot) { //check if the agent is pointing towards the spot
+        if (ag.i < spot.i && ag.j == spot.j) { //if agent is left of spot
             if (dir == 2) {
                 return true;
             }
-        } else if (ag.i > w.i && ag.j == w.j) { //if agent is to the right of wumpus
+        } else if (ag.i > spot.i && ag.j == spot.j) { //if agent is to the right of spot
             if (dir == 4) {
                 return true;
             }
-        } else if (ag.j < w.j && ag.i == w.i) { //if agent is below wumpus
+        } else if (ag.j < spot.j && ag.i == spot.i) { //if agent is below spot
             if (dir == 1) {
                 return true;
             }
-        } else if (ag.j > w.j && ag.i == w.i) { // if agent is above wumpus
+        } else if (ag.j > spot.j && ag.i == spot.i) { // if agent is above spot
             if (dir == 3) {
                 return true;
             }
