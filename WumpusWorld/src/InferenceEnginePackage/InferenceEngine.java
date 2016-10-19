@@ -64,7 +64,7 @@ public class InferenceEngine {
             }
         }
 
-        KB.createDesiredSpots(1); //spots that are unvisited and kindaSafe
+        KB.createDesiredSpots(1, agentLocation); //spots that are unvisited and kindaSafe
         Location closestDesiredSpot = KB.getClosestDesiredSpot(agentLocation);
 
         System.out.println("closest1 " + closestDesiredSpot.i + " " + closestDesiredSpot.j);
@@ -75,9 +75,11 @@ public class InferenceEngine {
 
             tempVisited.clear();
             plan.clear();
-            KB.createDesiredSpots(2); //spots that are unvisited
+            KB.createDesiredSpots(2, agentLocation); //spots that are unvisited
             Location closestDesiredSpot2 = KB.getClosestDesiredSpot(agentLocation);
 
+            System.out.println("closest2 " + closestDesiredSpot.i + " " + closestDesiredSpot.j);
+            
             if (!KB.desiredSpots.isEmpty() && planToExplore(closestDesiredSpot2, agentDirection, agentLocation)) {
                 return;
             } else {
@@ -264,8 +266,6 @@ public class InferenceEngine {
         }
 
         if (!KB.KBMap[x][y].visited || !percept[0]) { //if previosuly visited we dont need to reupdate these, i think...
-
-            if (obstacle) {   //If the agent hits an obstacle we need to correct for the fact that that the agentLocation is different from the location of the space we our updating
                 int xMod = 0;
                 int yMod = 0;
                 if (agentDirection == 1) {
@@ -277,11 +277,12 @@ public class InferenceEngine {
                 } else {
                     xMod = -1;
                 }
+            if (obstacle) {   //If the agent hits an obstacle we need to correct for the fact that that the agentLocation is different from the location of the space we our updating
                 KB.setObstacle(x + xMod, y + yMod);
             } else if (pit) {
-                KB.setKnownPit(x, y);   //Agent is dead, but we still need to update the map
+                KB.setKnownPit(x + xMod, y + yMod);   //Agent is dead, but we still need to update the map
             } else if (wumpus) {
-                KB.setKnownWumpus(x, y);   //Agent is dead, still need to update map.
+                KB.setKnownWumpus(x + xMod, y + yMod);   //Agent is dead, still need to update map.
             }
 
             if (breezy) {

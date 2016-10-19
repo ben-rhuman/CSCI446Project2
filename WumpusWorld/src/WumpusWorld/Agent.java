@@ -73,6 +73,17 @@ public class Agent {
             case 3: //(3) forward
                 percept = move();
                 if (!percept[0] || percept[1]) { //If move failed (0) or obstacle (1) 
+                    if(percept[4]){ //
+                        System.out.println("Fell in a pit.");
+                        payOff -= 100;
+                    }
+                    if(percept[5]){
+                        System.out.println("Eaten by a wumpus.");
+                        payOff -= 100;
+                    }
+                    if (percept[1]){
+                        System.out.println("Hit an obstacle.");
+                    }
                     //Leave location alone
                 } else {
                     updateLocation();

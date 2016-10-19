@@ -21,7 +21,7 @@ public class KnowledgeBase {
 
     }
 
-    public void createDesiredSpots(int type) {
+    public void createDesiredSpots(int type, Location agent) {
 
         desiredSpots.clear();
 
@@ -30,11 +30,11 @@ public class KnowledgeBase {
                 Location l = new Location(i, j);
                 if (!KBMap[i][j].unknown) {
                     if (type == 1) {
-                        if (!KBMap[i][j].visited && KBMap[i][j].kindaSafe && !KBMap[i][j].obstacle) {
+                        if (!sameSpotAsCurrent(agent, i, j) && !KBMap[i][j].visited && KBMap[i][j].kindaSafe && !KBMap[i][j].obstacle) {
                             desiredSpots.add(l);
                         }
                     } else if (type == 2) {
-                        if (!KBMap[i][j].visited) {
+                        if (!sameSpotAsCurrent(agent, i, j) && !KBMap[i][j].visited) {
                             desiredSpots.add(l);
                         }
                     }
@@ -43,6 +43,12 @@ public class KnowledgeBase {
         }
     }
 
+    public boolean sameSpotAsCurrent(Location agent, int i, int j){
+        if(agent.i == i && agent.j == j){
+            return true;
+        }
+        return false;
+    }
     public int desiredSpotsIndexOf(Location l) {
         int index = 0;
         for (int i = 0; i < desiredSpots.size(); i++) {
@@ -232,7 +238,7 @@ public class KnowledgeBase {
         
         return currentClosest;
         }
-        return current;
+        return null;
     }
 
     public ArrayList orderDirection(ArrayList<Location> l, Location w, Location agent) {
@@ -350,6 +356,7 @@ public class KnowledgeBase {
     }
 
     public boolean rightDirection(Location ag, int dir, Location spot) { //check if the agent is pointing towards the spot
+        
         if (ag.i < spot.i && ag.j == spot.j) { //if agent is left of spot
             if (dir == 2) {
                 return true;
@@ -359,11 +366,11 @@ public class KnowledgeBase {
                 return true;
             }
         } else if (ag.j < spot.j && ag.i == spot.i) { //if agent is below spot
-            if (dir == 1) {
+            if (dir == 3) {
                 return true;
             }
         } else if (ag.j > spot.j && ag.i == spot.i) { // if agent is above spot
-            if (dir == 3) {
+            if (dir == 1) {
                 return true;
             }
         }
@@ -434,6 +441,9 @@ public class KnowledgeBase {
     }
     
     public boolean rightNextToSpot(Location current, Location spot){
+        if(current.i == spot.i && current.j == spot.j){
+            return true;
+        }
         try{
             if((current.i - 1) == spot.i && current.j == spot.j){
                 return true;
