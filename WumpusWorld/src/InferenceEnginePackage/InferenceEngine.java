@@ -67,8 +67,10 @@ public class InferenceEngine {
         KB.createDesiredSpots(1, agentLocation); //spots that are unvisited and kindaSafe
         Location closestDesiredSpot = KB.getClosestDesiredSpot(agentLocation);
 
+        if(closestDesiredSpot!= null){
         System.out.println("closest1 " + closestDesiredSpot.i + " " + closestDesiredSpot.j);
-
+        }
+        
         if (!KB.desiredSpots.isEmpty() && planToExplore(closestDesiredSpot, agentDirection, agentLocation)) {
             return;
         } else {
@@ -78,8 +80,9 @@ public class InferenceEngine {
             KB.createDesiredSpots(2, agentLocation); //spots that are unvisited
             Location closestDesiredSpot2 = KB.getClosestDesiredSpot(agentLocation);
 
+            if(closestDesiredSpot!= null){
             System.out.println("closest2 " + closestDesiredSpot.i + " " + closestDesiredSpot.j);
-            
+            }
             if (!KB.desiredSpots.isEmpty() && planToExplore(closestDesiredSpot2, agentDirection, agentLocation)) {
                 return;
             } else {

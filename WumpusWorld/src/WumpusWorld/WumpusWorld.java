@@ -20,6 +20,7 @@ public class WumpusWorld {
         
         Agent a =  new Agent(0, 0, 1, 2, m);
         
+        //so far the agent moves accordingly for now just need inference rules
         //changed rightNextToSpot to see if the spots are the same
         //changed rightDirection method to different north and south
     }

@@ -28,9 +28,9 @@ public class KnowledgeBase {
         for (int i = 0; i < KBMap.length; i++) {
             for (int j = 0; j < KBMap[i].length; j++) {
                 Location l = new Location(i, j);
-                if (!KBMap[i][j].unknown) {
+                if (!KBMap[i][j].unknown && !KBMap[i][j].knownPit && !KBMap[i][j].knownWumpus && !KBMap[i][j].obstacle) {
                     if (type == 1) {
-                        if (!sameSpotAsCurrent(agent, i, j) && !KBMap[i][j].visited && KBMap[i][j].kindaSafe && !KBMap[i][j].obstacle) {
+                        if (!sameSpotAsCurrent(agent, i, j) && !KBMap[i][j].visited && KBMap[i][j].kindaSafe ) {
                             desiredSpots.add(l);
                         }
                     } else if (type == 2) {
