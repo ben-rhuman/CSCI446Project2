@@ -20,6 +20,7 @@ public class WumpusWorld {
         
         Agent a =  new Agent(0, 0, 1, 2, m);
         
+        //changed planToHunt to be similar to planToExplore
 
     }
 

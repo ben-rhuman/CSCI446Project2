@@ -287,13 +287,14 @@ public class KnowledgeBase {
 
         try {
             if (!KBMap[l.i + 1][l.j].knownWumpus && !KBMap[l.i + 1][l.j].knownPit) {
-                if (KBMap[l.i + 1][l.j].safe || KBMap[l.i + 1][l.j].visited || KBMap[l.i + 1][l.j].kindaSafe) {
-
+                if (KBMap[l.i + 1][l.j].safe ||  KBMap[l.i + 1][l.j].kindaSafe) {
+                    if(KBMap[l.i + 1][l.j].visited){
                     Location adj = new Location(l.i + 1, l.j);
                     if (!listContainsLocation(tempVisited, adj)) {
                         adj.dir = 2;
                         adjacents.add(adj);
                     }
+                }
                 }
             }
         } catch (IndexOutOfBoundsException e) {
@@ -301,11 +302,13 @@ public class KnowledgeBase {
         }
         try {
             if (!KBMap[l.i - 1][l.j].knownWumpus && !KBMap[l.i - 1][l.j].knownPit) {
-                if (KBMap[l.i - 1][l.j].safe || KBMap[l.i - 1][l.j].visited || KBMap[l.i + 1][l.j].kindaSafe) {
+                if (KBMap[l.i - 1][l.j].safe ||  KBMap[l.i + 1][l.j].kindaSafe) {
+                    if(KBMap[l.i - 1][l.j].visited){
                     Location adj = new Location(l.i - 1, l.j);
                     if (!listContainsLocation(tempVisited, adj)) {
                         adj.dir = 4;
                         adjacents.add(adj);
+                    }
                     }
                 }
             }
@@ -314,12 +317,14 @@ public class KnowledgeBase {
         }
         try {
             if (!KBMap[l.i][l.j + 1].knownWumpus && !KBMap[l.i][l.j + 1].knownPit) {
-                if (KBMap[l.i][l.j + 1].safe || KBMap[l.i][l.j + 1].visited || KBMap[l.i + 1][l.j].kindaSafe) {
+                if (KBMap[l.i][l.j + 1].safe ||  KBMap[l.i + 1][l.j].kindaSafe) {
+                    if(KBMap[l.i][l.j + 1].visited){
                     Location adj = new Location(l.i, l.j + 1);
                     if (!listContainsLocation(tempVisited, adj)) {
                         adj.dir = 3;
                         adjacents.add(adj);
                     }
+                }
                 }
             }
         } catch (IndexOutOfBoundsException e) {
@@ -327,12 +332,14 @@ public class KnowledgeBase {
         }
         try {
             if (!KBMap[l.i][l.j - 1].knownWumpus && !KBMap[l.i][l.j - 1].knownPit) {
-                if (KBMap[l.i][l.j - 1].safe || KBMap[l.i][l.j - 1].visited || KBMap[l.i + 1][l.j].kindaSafe) {
+                if (KBMap[l.i][l.j - 1].safe ||  KBMap[l.i + 1][l.j].kindaSafe) {
+                   if (KBMap[l.i][l.j - 1].visited){
                     Location adj = new Location(l.i, l.j - 1);
                     if (!listContainsLocation(tempVisited, adj)) {
                         adj.dir = 1;
                         adjacents.add(adj);
                     }
+                   }
                 }
             }
         } catch (IndexOutOfBoundsException e) {
@@ -365,7 +372,9 @@ public class KnowledgeBase {
 
     public ArrayList getTurnPlan(int dir1, int dir2) { //returns a plan to go from one direction to another
         ArrayList<Integer> turnPlan = new ArrayList<>();
-        if ((dir1 % 2 == 0) && (dir2 % 2 == 0)) { //if both even
+        if(dir1 == dir2){
+            return turnPlan;
+        }else if ((dir1 % 2 == 0) && (dir2 % 2 == 0)) { //if both even
             turnPlan.add(2);
             turnPlan.add(2);
         } else if ((dir1 % 2 != 0) && (dir2 % 2 != 0)) { //if both odd
@@ -421,6 +430,38 @@ public class KnowledgeBase {
             }
         }
 
+        return false;
+    }
+    
+    public boolean rightNextToSpot(Location current, Location spot){
+        try{
+            if((current.i - 1) == spot.i && current.j == spot.j){
+                return true;
+            }
+        }catch (IndexOutOfBoundsException e) {
+        }
+        
+        try{
+            if((current.i + 1) == spot.i && current.j == spot.j){
+                return true;
+            }
+        }catch (IndexOutOfBoundsException e) {
+        }
+        
+        try{
+            if(current.i == spot.i && (current.j - 1) == spot.j){
+                return true;
+            }
+        }catch (IndexOutOfBoundsException e) {
+        }
+        
+        try{
+            if(current.i == spot.i && (current.j + 1) == spot.j){
+                return true;
+            }
+        }catch (IndexOutOfBoundsException e) {
+        }
+        
         return false;
     }
 }

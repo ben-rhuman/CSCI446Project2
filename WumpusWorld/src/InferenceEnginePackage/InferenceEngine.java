@@ -18,7 +18,7 @@ public class InferenceEngine {
     }
 
     public void TELL(boolean[] percept, Location location, int direction, int arrowCount) {  // Allows tha agent to tell the IE about its percepts
-        agentLocation = location;
+        agentLocation = new Location(location.i, location.j);
         agentDirection = direction;
         this.arrowCount = arrowCount;
 
@@ -30,12 +30,13 @@ public class InferenceEngine {
 
     public ArrayList ASK() {  //Allows the IE to tell the agent a list of moves to take
         plan.clear();
+        tempVisited.clear();
         PLAN(); //formulates the list of actions
         return plan;
     }
 
     private void PLAN() { //gives a list of actions for the agent to do 
-        Location temp = new Location(agentLocation.i, agentLocation.j);
+       
         //(0) if trapped
         //(1) turn left 
         //(2) turn right
@@ -51,13 +52,13 @@ public class InferenceEngine {
             if (arrowCount != 0) {
                 Location w = new Location(KB.wump.get(0).i, KB.wump.get(0).j);
 
-                if (planToHunt(w, agentDirection, temp)) { //if we can make a plan to hunt the wumpus
+                if (planToHunt(w, agentDirection, agentLocation)) { //if we can make a plan to hunt the wumpus
 
                     KB.wump.remove(0); //remove it from the front of the list
                     return;
                 } else {
                     System.out.println("this shouldnt happen");
-                    temp = new Location(agentLocation.i, agentLocation.j); //reset temp
+                   tempVisited.clear();
                     plan.clear();
                 }
             }
@@ -68,16 +69,16 @@ public class InferenceEngine {
         
         System.out.println("closest1 " + closestDesiredSpot.i + " "  + closestDesiredSpot.j);
 
-        if (!KB.desiredSpots.isEmpty() && planToExplore(closestDesiredSpot, agentDirection, temp)) {
+        if (!KB.desiredSpots.isEmpty() && planToExplore(closestDesiredSpot, agentDirection, agentLocation)) {
             return;
         } else {
             
-            temp = new Location(agentLocation.i, agentLocation.j); //reset temp
+            tempVisited.clear();
             plan.clear();
             KB.createDesiredSpots(2); //spots that are unvisited
             Location closestDesiredSpot2 = KB.getClosestDesiredSpot(agentLocation);
 
-            if (!KB.desiredSpots.isEmpty() && planToExplore(closestDesiredSpot2, agentDirection, temp)) {
+            if (!KB.desiredSpots.isEmpty() && planToExplore(closestDesiredSpot2, agentDirection, agentLocation)) {
                 return;
             } else {
                 plan.add(0); //trapped
@@ -96,15 +97,20 @@ public class InferenceEngine {
         ArrayList<Integer> turnPlan;
 
         //update list of spots we have already been
-        tempVisited.add(currentLocation);
+        tempVisited.add(currentLocation); //** make sure it is kept in check
 
         adjacents = KB.returnSafeAdjacents(currentLocation, tempVisited);
 
         //order that list to have the directions that move closer to the wumpus first
         adjacents = KB.orderDirection(adjacents, closest, currentLocation);
 
-        if ((currentLocation.i == closest.i) && (currentLocation.j == closest.j)) { //base case if can shoot wumpus
+        if ((currentLocation.i ==closest.i|| currentLocation.j == closest.j) && KB.rightNextToSpot(currentLocation, closest )) { //base case if can shoot wumpus
 
+            while (!KB.rightDirection(currentLocation, currentDir, closest)) { //fix the direction so the agent can point towards the wumpus
+                currentDir++;
+                plan.add(2);
+            }
+            plan.add(5);
             return true;
 
         } else if (!adjacents.isEmpty()) { //the list is not empty
@@ -112,6 +118,8 @@ public class InferenceEngine {
             for (int i = 0; i < adjacents.size(); i++) {
 
                 //setup the direction and current location for the next potential move
+                int curLocI = currentLocation.i; //hold to restore
+                int curLocJ = currentLocation.j; //hold to restore
                 currentLocation.setLocation(adjacents.get(i).i, adjacents.get(i).j);
 
                 turnPlan = KB.getTurnPlan(currentDir, adjacents.get(i).dir);
@@ -125,6 +133,7 @@ public class InferenceEngine {
                 plan.add(3); //move forward 
                 numNewMoves++;
 
+                int curDir = currentDir; //hold to restore
                 currentDir = adjacents.get(i).dir; //set up curDir after it was used
 
                 if (planToExplore(closest, currentDir, adjacents.get(i))) {
@@ -132,6 +141,11 @@ public class InferenceEngine {
 
                 } else { //remove the actions if the plan failed
                    
+                    currentLocation.setLocation(curLocI, curLocJ);  //restore location
+                    currentDir = curDir;                            //restore direction
+                    
+                    
+                    
                     for (int j = 0; j < numNewMoves; j++) { //extra iteration for single forward action
                         plan.remove(plan.size() - 1);
                     }
@@ -144,21 +158,21 @@ public class InferenceEngine {
 
         return false;
     }
-
-    private boolean planToHunt(Location w, int currentDir, Location currentLocation) { //recursively find a path to the wumpus
+//if ((currentLocation.i == w.i || currentLocation.j == w.j) && !KB.obstacleInWay(currentLocation, w)) {
+    private boolean planToHunt(Location w, int currentDir, Location currentLocation) { //find a path to the nearest desiredSpots spot
 
         ArrayList<Location> adjacents;  //create list of adjacents safe/visited
         ArrayList<Integer> turnPlan;
 
         //update list of spots we have already been
-        tempVisited.add(currentLocation);
+        tempVisited.add(currentLocation); //** make sure it is kept in check
 
         adjacents = KB.returnSafeAdjacents(currentLocation, tempVisited);
 
         //order that list to have the directions that move closer to the wumpus first
         adjacents = KB.orderDirection(adjacents, w, currentLocation);
 
-        if ((currentLocation.i == w.i || currentLocation.j == w.j) && !KB.obstacleInWay(currentLocation, w)) { //base case if can shoot wumpus
+if ((currentLocation.i == w.i || currentLocation.j == w.j) && !KB.obstacleInWay(currentLocation, w)) { //base case if can shoot wumpus
 
             while (!KB.rightDirection(currentLocation, currentDir, w)) { //fix the direction so the agent can point towards the wumpus
                 currentDir++;
@@ -172,9 +186,12 @@ public class InferenceEngine {
             for (int i = 0; i < adjacents.size(); i++) {
 
                 //setup the direction and current location for the next potential move
+                int curLocI = currentLocation.i; //hold to restore
+                int curLocJ = currentLocation.j; //hold to restore
                 currentLocation.setLocation(adjacents.get(i).i, adjacents.get(i).j);
 
                 turnPlan = KB.getTurnPlan(currentDir, adjacents.get(i).dir);
+
                 int numNewMoves = 0;
                 
                 for (int j = 0; j < turnPlan.size(); j++) { //add these turns to the plan
@@ -184,12 +201,19 @@ public class InferenceEngine {
                 plan.add(3); //move forward 
                 numNewMoves++;
 
+                int curDir = currentDir; //hold to restore
                 currentDir = adjacents.get(i).dir; //set up curDir after it was used
 
                 if (planToHunt(w, currentDir, adjacents.get(i))) {
                     return true;
 
                 } else { //remove the actions if the plan failed
+                   
+                    currentLocation.setLocation(curLocI, curLocJ);  //restore location
+                    currentDir = curDir;                            //restore direction
+                    
+                    
+                    
                     for (int j = 0; j < numNewMoves; j++) { //extra iteration for single forward action
                         plan.remove(plan.size() - 1);
                     }

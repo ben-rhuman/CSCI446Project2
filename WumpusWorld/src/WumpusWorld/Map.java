@@ -188,7 +188,8 @@ public class Map {
             false, //(3)New room is stinky room
             false, //(4)New room is pit
             false, //(5)New room is wumpus
-            false //(6)New room is gold
+            false, //(6)New room is gold
+            false
         };
         try {
             if (direction == 1) {
@@ -224,6 +225,7 @@ public class Map {
         }
         percept[2] = room.getBreeze();
         percept[3] = room.getStench();
+        percept[7] = false;
 
         return percept;
     }
