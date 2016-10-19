@@ -209,6 +209,7 @@ public class KnowledgeBase {
 
     ///==================Checking Knowlege Base from Inference Engine====================
     public Location getClosestDesiredSpot(Location current) {
+        if(!desiredSpots.isEmpty()){
         Location currentClosest = desiredSpots.get(0);
         double currentDistance = Double.MAX_VALUE;
 
@@ -228,7 +229,10 @@ public class KnowledgeBase {
             }
 
         }
+        
         return currentClosest;
+        }
+        return current;
     }
 
     public ArrayList orderDirection(ArrayList<Location> l, Location w, Location agent) {
@@ -240,28 +244,28 @@ public class KnowledgeBase {
 
             switch (l.get(i).dir) {
                 case 1: //north
-                    if ((w.j - (--agent.j)) > (w.j - agent.j)) {  //if the wumpus is north of the explorer then north is a progressive direction towards the wumpus
+                    if ((w.j - (agent.j - 1)) > (w.j - agent.j)) {  //if the wumpus is north of the explorer then north is a progressive direction towards the wumpus
                         ordered.add(l.get(i));
                     } else {
                         temp.add(l.get(i));
                     }
                     break;
                 case 2: //east
-                    if ((w.i - (++agent.i)) < (w.i - agent.i)) {
+                    if ((w.i - (agent.i + 1)) < (w.i - agent.i)) {
                         ordered.add(l.get(i));
                     } else {
                         temp.add(l.get(i));
                     }
                     break;
                 case 3: //south
-                    if ((w.j - (++agent.j)) < (w.j - agent.j)) {
+                    if ((w.j - (agent.j + 1)) < (w.j - agent.j)) {
                         ordered.add(l.get(i));
                     } else {
                         temp.add(l.get(i));
                     }
                     break;
                 default: //west
-                    if ((w.i - (--agent.i)) > (w.i - agent.i)) {
+                    if ((w.i - (agent.i - 1)) > (w.i - agent.i)) {
                         ordered.add(l.get(i));
                     } else {
                         temp.add(l.get(i));
@@ -282,8 +286,8 @@ public class KnowledgeBase {
         ArrayList<Location> adjacents = new ArrayList<>();
 
         try {
-            if (KBMap[l.i + 1][l.j].knownWumpus && KBMap[l.i + 1][l.j].knownPit) {
-                if (KBMap[l.i + 1][l.j].safe || KBMap[l.i + 1][l.j].visited) {
+            if (!KBMap[l.i + 1][l.j].knownWumpus && !KBMap[l.i + 1][l.j].knownPit) {
+                if (KBMap[l.i + 1][l.j].safe || KBMap[l.i + 1][l.j].visited || KBMap[l.i + 1][l.j].kindaSafe) {
 
                     Location adj = new Location(l.i + 1, l.j);
                     if (!listContainsLocation(tempVisited, adj)) {
@@ -296,8 +300,8 @@ public class KnowledgeBase {
 
         }
         try {
-            if (KBMap[l.i - 1][l.j].knownWumpus && KBMap[l.i - 1][l.j].knownPit) {
-                if (KBMap[l.i - 1][l.j].safe || KBMap[l.i - 1][l.j].visited) {
+            if (!KBMap[l.i - 1][l.j].knownWumpus && !KBMap[l.i - 1][l.j].knownPit) {
+                if (KBMap[l.i - 1][l.j].safe || KBMap[l.i - 1][l.j].visited || KBMap[l.i + 1][l.j].kindaSafe) {
                     Location adj = new Location(l.i - 1, l.j);
                     if (!listContainsLocation(tempVisited, adj)) {
                         adj.dir = 4;
@@ -309,8 +313,8 @@ public class KnowledgeBase {
 
         }
         try {
-            if (KBMap[l.i][l.j + 1].knownWumpus && KBMap[l.i][l.j + 1].knownPit) {
-                if (KBMap[l.i][l.j + 1].safe || KBMap[l.i][l.j + 1].visited) {
+            if (!KBMap[l.i][l.j + 1].knownWumpus && !KBMap[l.i][l.j + 1].knownPit) {
+                if (KBMap[l.i][l.j + 1].safe || KBMap[l.i][l.j + 1].visited || KBMap[l.i + 1][l.j].kindaSafe) {
                     Location adj = new Location(l.i, l.j + 1);
                     if (!listContainsLocation(tempVisited, adj)) {
                         adj.dir = 3;
@@ -322,8 +326,8 @@ public class KnowledgeBase {
 
         }
         try {
-            if (KBMap[l.i][l.j - 1].knownWumpus && KBMap[l.i][l.j - 1].knownPit) {
-                if (KBMap[l.i][l.j - 1].safe || KBMap[l.i][l.j - 1].visited) {
+            if (!KBMap[l.i][l.j - 1].knownWumpus && !KBMap[l.i][l.j - 1].knownPit) {
+                if (KBMap[l.i][l.j - 1].safe || KBMap[l.i][l.j - 1].visited || KBMap[l.i + 1][l.j].kindaSafe) {
                     Location adj = new Location(l.i, l.j - 1);
                     if (!listContainsLocation(tempVisited, adj)) {
                         adj.dir = 1;

@@ -31,8 +31,7 @@ public class Agent {
 //(6)New room is gold
 
     public Agent(int x, int y, int numGold, int direction, Map worldMap) {  //Direction in our case should always be 2 (i.e. East) at start.
-        currentLocation.i = x;
-        currentLocation.j = y;
+       currentLocation = new Location(x,y);
         this.payOff = numGold;
         this.direction = direction;
         this.worldMap = worldMap;
@@ -40,6 +39,8 @@ public class Agent {
         IE = new InferenceEngine(worldMap.size);
 
         percept = worldMap.checkPerceptAtLocation(currentLocation);
+        
+        playGame();
     }
 
 ////////////////////////// Game Execution Functions ////////////////////////////
@@ -59,6 +60,10 @@ public class Agent {
         }
 
         switch ((int) plan.get(0)) {
+            case 0: //if trapped
+                System.out.println("trapped son");
+                done = true;
+                break;
             case 1: //(1) turn left 
                 turnLeft();
                 break;
@@ -170,10 +175,39 @@ public class Agent {
     //////////////////////// End Agent Action Methods //////////////////////////////////
     //////////////////////////// Agent - Inference Engine Methods ////////////////////////////
     private void TELL() {
+        
         IE.TELL(percept, currentLocation, direction, arrowCount);   // Tells the IE what the current percepts are
+        printPercepts(percept, currentLocation);
+        
+    
     }
 
     private ArrayList ASK() {
         return IE.ASK();  //Asks the IE what move it should take. 
+    }
+    
+    public void printPercepts(boolean[] percept,Location currentLocation){
+        for(int i = 0; i < percept.length; i++){
+            switch(i){
+                case 0: System.out.println("Move suceeded/failed: " + percept[i]);
+                    break;
+                case 1: System.out.println("New room obstacle: " + percept[i]);
+                    break;
+                case 2: System.out.println("New room is breezy: " + percept[i]);
+                    break;
+                case 3: System.out.println("New room is stinky: " + percept[i]);
+                    break;
+                case 4: System.out.println("New room has pit: " + percept[i]);
+                    break;
+                case 5: System.out.println("New room has wumpus: " + percept[i]);
+                    break;
+                case 6: System.out.println("New room has gold: " + percept[i]);
+                    break;
+                case 7: System.out.println("Hear wumpus scream: " + percept[i]);
+                    break;
+                
+        }
+        }
+        System.out.println("currentLocation" + currentLocation.i + " " + currentLocation.j);
     }
 }
