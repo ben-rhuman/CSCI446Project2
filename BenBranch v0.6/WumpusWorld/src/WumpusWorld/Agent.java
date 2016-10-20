@@ -37,7 +37,8 @@ public class Agent {
         this.payOff = numGold;
         this.direction = direction;
         this.worldMap = worldMap;
-
+        arrowCount = worldMap.getNumberWumpus();
+        
         IE = new InferenceEngine(worldMap.size);
 
         percept = worldMap.checkPerceptAtLocation(currentLocation);
@@ -51,6 +52,7 @@ public class Agent {
         ArrayList<Integer> plan;
         while (done != true) {
             worldMap.print(currentLocation, direction);
+            
             TELL();
             plan = ASK();
             executePlan(plan);
@@ -99,6 +101,9 @@ public class Agent {
                 break;
             case 5: //(5) shoot
                 percept[7] = shootArrow();  //Updates the scream percept if a wumpus is killed
+                percept[5] = false;
+                TELL();
+                percept[7] = false;            
                 break;
             default:
                 System.out.println("ERROR: executePlan() hit default case.");

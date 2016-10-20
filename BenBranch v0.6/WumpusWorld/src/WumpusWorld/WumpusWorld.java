@@ -9,10 +9,10 @@ import java.util.Scanner;
 public class WumpusWorld {
 
     public static void main(String[] args) {
-        int size = 25;
-        double pitP = .05;
-        double obstacleP = .05;
-        double wumpusP = .05;
+        int size = 5;
+        double pitP = .0;
+        double obstacleP = .0;
+        double wumpusP = 1;
 
         
         Map m = new Map(size, pitP, obstacleP, wumpusP);

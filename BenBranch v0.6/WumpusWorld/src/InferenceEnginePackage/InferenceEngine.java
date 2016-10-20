@@ -26,6 +26,7 @@ public class InferenceEngine {
         for (int i = 0; i < 5; i++) { // 4 is our arbitrary amount of inference cycles  
             LogicalMapDeduction();
         }
+        printKB();
     }
 
     public ArrayList ASK() {  //Allows the IE to tell the agent a list of moves to take
@@ -315,6 +316,7 @@ public class InferenceEngine {
                 case 1:
                     if (KB.KBMap[x][y].knownWumpus || KB.KBMap[x][y].possibleWumpus) {
                         KB.KBMap[x][y].knownWumpus = false;
+                        KB.KBMap[x][y].visited = true;
                         KB.setKindaSafe(x, y);
                     } else {
                         y--;
@@ -324,7 +326,9 @@ public class InferenceEngine {
                 case 2:
                     if (KB.KBMap[x][y].knownWumpus || KB.KBMap[x][y].possibleWumpus) {
                         KB.KBMap[x][y].knownWumpus = false;
+                        KB.KBMap[x][y].visited = true;
                         KB.setKindaSafe(x, y);
+                        System.out.println("Wumpus killed");
                     } else {
                         x++;
                         killWumpus(x, y);
@@ -333,6 +337,7 @@ public class InferenceEngine {
                 case 3:
                     if (KB.KBMap[x][y].knownWumpus || KB.KBMap[x][y].possibleWumpus) {
                         KB.KBMap[x][y].knownWumpus = false;
+                        KB.KBMap[x][y].visited = true;
                         KB.setKindaSafe(x, y);
                     } else {
                         y++;
@@ -342,6 +347,7 @@ public class InferenceEngine {
                 case 4:
                     if (KB.KBMap[x][y].knownWumpus || KB.KBMap[x][y].possibleWumpus) {
                         KB.KBMap[x][y].knownWumpus = false;
+                        KB.KBMap[x][y].visited = true;
                         KB.setKindaSafe(x, y);
                     } else {
                         x--;
@@ -374,16 +380,6 @@ public class InferenceEngine {
                 KB.setKindaSafe(i + 1, j);
             }
 
-//            else if (KB.KBMap[i][j].breeze && KB.KBMap[i][j].stench) {   //ForAll Room1, (Stinky(Room1) && Breezy(Room1)) && !KindaSafe(Room2) => PossibleWumpus(Room2) && PossiblePit(Room2)
-//                KB.setPossiblePit(i, j - 1); //Marks possible wumpus/pit if nto already marked kindaSafe
-//                KB.setPossibleWumpus(i, j - 1);
-//                KB.setPossiblePit(i, j + 1);
-//                KB.setPossibleWumpus(i, j + 1);
-//                KB.setPossiblePit(i - 1, j);
-//                KB.setPossibleWumpus(i - 1, j);
-//                KB.setPossiblePit(i + 1, j);
-//                KB.setPossibleWumpus(i + 1, j);
-//            } 
             if (KB.KBMap[i][j].breeze) {  // ForAll Room1, Breezy(Room1) && !KindaSafe(Room2) =>  PossiblePit(Room2)
                 KB.setPossiblePit(i, j - 1); //Marks possible pit
                 KB.setPossiblePit(i, j + 1);
@@ -406,13 +402,13 @@ public class InferenceEngine {
                 }
             }
 
-            if (KB.KBMap[i][j].possibleWumpus) {
-                if (KB.checkSafe(i, j - 1) || KB.checkSafe(i, j + 1) || KB.checkSafe(i - 1, j) || KB.checkSafe(i + 1, j)) {   //For All Room1 possibleWumpus(Room1) && (Safe(RoomNorth) || Safe(RoomEast) || Safe(RoomSouth) || Safe(RoomWest)) => kindSafe(Room1)
-                    KB.setKindaSafe(i, j);
-                } else if (KB.checkStench(i, j - 1) && KB.checkStench(i, j + 1) && KB.checkStench(i - 1, j) && KB.checkStench(i + 1, j)) {  //For All Room1 possibleWumpus(Room1) && !(Safe(RoomNorth) || Safe(RoomEast) || Safe(RoomSouth) || Safe(RoomWest)) && (Stench(RoomNorth) && Stench(RoomEast) && Stench(RoomSouth) && Stench(RoomWest)) => Pit(Room1)
-                    KB.setKnownWumpus(i, j);
-                }
-            }
+//            if (KB.KBMap[i][j].possibleWumpus) {
+//                if (KB.checkSafe(i, j - 1) || KB.checkSafe(i, j + 1) || KB.checkSafe(i - 1, j) || KB.checkSafe(i + 1, j)) {   //For All Room1 possibleWumpus(Room1) && (Safe(RoomNorth) || Safe(RoomEast) || Safe(RoomSouth) || Safe(RoomWest)) => kindSafe(Room1)
+//                    KB.setKindaSafe(i, j);
+//                } else if (KB.checkStench(i, j - 1) && KB.checkStench(i, j + 1) && KB.checkStench(i - 1, j) && KB.checkStench(i + 1, j)) {  //For All Room1 possibleWumpus(Room1) && !(Safe(RoomNorth) || Safe(RoomEast) || Safe(RoomSouth) || Safe(RoomWest)) && (Stench(RoomNorth) && Stench(RoomEast) && Stench(RoomSouth) && Stench(RoomWest)) => Pit(Room1)
+//                    KB.setKnownWumpus(i, j);
+//                }
+//            }
 
             if (KB.KBMap[i][j].breeze) {
                 if (KB.checkKindaSafe(i, j - 1) && KB.checkKindaSafe(i + 1, j) && KB.checkKindaSafe(i, j + 1)) { //NES
@@ -426,17 +422,25 @@ public class InferenceEngine {
                 }
             }
 
-            if (KB.KBMap[i][j].stench) {
-                if (KB.checkKindaSafe(i, j - 1) && KB.checkKindaSafe(i + 1, j) && KB.checkKindaSafe(i, j + 1)) { //NES
-                    KB.setKnownWumpus(i - 1, j);  //For All Room1 Stench(Room1) && (KindaSafe(RoomNorth) && KindaSafe(RoomEast) && KindaSafe(RoomSouth)) => Wumpus(RoomWest)
-                } else if (KB.checkKindaSafe(i, j - 1) && KB.checkKindaSafe(i + 1, j) && KB.checkKindaSafe(i - 1, j)) { //NEW
-                    KB.setKnownWumpus(i, j + 1);  //For All Room1 Stench(Room1) && (KindaSafe(RoomNorth) && KindaSafe(RoomEast) && KindaSafe(RoomWest)) => Wumpus(RoomSouth)
-                } else if (KB.checkKindaSafe(i, j - 1) && KB.checkKindaSafe(i, j + 1) && KB.checkKindaSafe(i - 1, j)) { //NSW
-                    KB.setKnownWumpus(i + 1, j);  //For All Room1 Stench(Room1) && (KindaSafe(RoomNorth) && KindaSafe(RoomWest) && KindaSafe(RoomSouth)) => Wumpus(RoomEast)
-                } else if (KB.checkKindaSafe(i, j + 1) && KB.checkKindaSafe(i + 1, j) && KB.checkKindaSafe(i - 1, j)) { //SEW
-                    KB.setKnownWumpus(i, j - 1);  //For All Room1 Stench(Room1) && (KindaSafe(RoomWest) && KindaSafe(RoomEast) && KindaSafe(RoomSouth)) => Wumpus(RoomNorth)
-                }
-            }
+//            if (KB.KBMap[i][j].stench) {
+//                if (KB.checkKindaSafe(i, j - 1) && KB.checkKindaSafe(i + 1, j) && KB.checkKindaSafe(i, j + 1)) { //NES
+//                    System.out.println("Infer Wump1");
+//                    KB.setKnownWumpus(i - 1, j);  //For All Room1 Stench(Room1) && (KindaSafe(RoomNorth) && KindaSafe(RoomEast) && KindaSafe(RoomSouth)) => Wumpus(RoomWest)
+//                } else if (KB.checkKindaSafe(i, j - 1) && KB.checkKindaSafe(i + 1, j) && KB.checkKindaSafe(i - 1, j)) { //NEW
+//                    System.out.println("Infer Wump2");
+//                    KB.setKnownWumpus(i, j + 1);  //For All Room1 Stench(Room1) && (KindaSafe(RoomNorth) && KindaSafe(RoomEast) && KindaSafe(RoomWest)) => Wumpus(RoomSouth)
+//                } else if (KB.checkKindaSafe(i, j - 1) && KB.checkKindaSafe(i, j + 1) && KB.checkKindaSafe(i - 1, j)) { //NSW
+//                    System.out.println("Infer Wump3");
+//                    KB.setKnownWumpus(i + 1, j);  //For All Room1 Stench(Room1) && (KindaSafe(RoomNorth) && KindaSafe(RoomWest) && KindaSafe(RoomSouth)) => Wumpus(RoomEast)
+//                } else if (KB.checkKindaSafe(i, j + 1) && KB.checkKindaSafe(i + 1, j) && KB.checkKindaSafe(i - 1, j)) { //SEW
+//                    System.out.println("Infer Wum4");
+//                    KB.setKnownWumpus(i, j - 1);  //For All Room1 Stench(Room1) && (KindaSafe(RoomWest) && KindaSafe(RoomEast) && KindaSafe(RoomSouth)) => Wumpus(RoomNorth)
+//                }
+//            }
         }
+    }
+    
+    public void printKB(){
+        KB.print();
     }
 }
