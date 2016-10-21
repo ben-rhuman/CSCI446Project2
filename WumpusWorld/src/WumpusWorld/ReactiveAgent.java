@@ -62,7 +62,9 @@ public class ReactiveAgent {
             reactiveMove();
 
         }
+        if(done != true){ //just for printing, when trapped
         System.out.println("Got trapped");
+        }
 
     }
 
