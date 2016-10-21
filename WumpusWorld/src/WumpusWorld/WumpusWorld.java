@@ -12,7 +12,7 @@ public class WumpusWorld {
         int size = 3;
         double pitP = .3;
         double obstacleP = .0;
-        double wumpusP = .0;
+        double wumpusP = .4;
 
         
         Map m = new Map(size, pitP, obstacleP, wumpusP);

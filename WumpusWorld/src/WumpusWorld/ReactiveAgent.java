@@ -53,9 +53,9 @@ public class ReactiveAgent {
                 break;
             }
             
-            if(percept[0]){
+            
             percept = worldMap.checkPerceptAtLocation(currentLocation);
-            }
+            
             worldMap.print(currentLocation, direction);
             printPercepts(percept, currentLocation);
 
