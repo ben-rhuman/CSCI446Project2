@@ -26,7 +26,7 @@ public class InferenceEngine {
         for (int i = 0; i < 5; i++) { // 4 is our arbitrary amount of inference cycles  
             LogicalMapDeduction();
         }
-        printKB();
+        
     }
 
     public ArrayList ASK() {  //Allows the IE to tell the agent a list of moves to take
@@ -38,6 +38,7 @@ public class InferenceEngine {
 
     private void PLAN() { //gives a list of actions for the agent to do 
 
+        KB.KBMap[0][0].printRoom(0, 0);
         //(0) if trapped
         //(1) turn left 
         //(2) turn right
@@ -48,7 +49,7 @@ public class InferenceEngine {
             plan.add(4);
             return;
         }
-
+        System.out.println(KB.wump.size());
         if (!KB.wump.isEmpty()) { //if there is a known wumpus build a plan to kill it
             if (arrowCount != 0) {
                 Location w = new Location(KB.wump.get(0).i, KB.wump.get(0).j);
@@ -72,6 +73,7 @@ public class InferenceEngine {
             System.out.println("closest: (" + closestDesiredSpot.i + ", " + closestDesiredSpot.j + ")");
         }
 
+        
         if (!KB.desiredSpots.isEmpty() && planToExplore(closestDesiredSpot, agentDirection, agentLocation)) {
             return;
         } else {
@@ -267,6 +269,7 @@ public class InferenceEngine {
 
         if (scream) {
             killWumpus(x, y);
+            
         }
 
         if (!KB.KBMap[x][y].visited || !percept[0]) { //if previosuly visited we dont need to reupdate these, i think...
@@ -316,7 +319,7 @@ public class InferenceEngine {
                 case 1:
                     if (KB.KBMap[x][y].knownWumpus || KB.KBMap[x][y].possibleWumpus) {
                         KB.KBMap[x][y].knownWumpus = false;
-                        KB.KBMap[x][y].visited = true;
+                        //KB.KBMap[x][y].visited = true;
                         KB.setKindaSafe(x, y);
                     } else {
                         y--;
@@ -326,7 +329,7 @@ public class InferenceEngine {
                 case 2:
                     if (KB.KBMap[x][y].knownWumpus || KB.KBMap[x][y].possibleWumpus) {
                         KB.KBMap[x][y].knownWumpus = false;
-                        KB.KBMap[x][y].visited = true;
+                        //KB.KBMap[x][y].visited = true;
                         KB.setKindaSafe(x, y);
                         System.out.println("Wumpus killed");
                     } else {
@@ -337,7 +340,7 @@ public class InferenceEngine {
                 case 3:
                     if (KB.KBMap[x][y].knownWumpus || KB.KBMap[x][y].possibleWumpus) {
                         KB.KBMap[x][y].knownWumpus = false;
-                        KB.KBMap[x][y].visited = true;
+                        //KB.KBMap[x][y].visited = true;
                         KB.setKindaSafe(x, y);
                     } else {
                         y++;
@@ -347,7 +350,7 @@ public class InferenceEngine {
                 case 4:
                     if (KB.KBMap[x][y].knownWumpus || KB.KBMap[x][y].possibleWumpus) {
                         KB.KBMap[x][y].knownWumpus = false;
-                        KB.KBMap[x][y].visited = true;
+                        //KB.KBMap[x][y].visited = true;
                         KB.setKindaSafe(x, y);
                     } else {
                         x--;
@@ -402,13 +405,13 @@ public class InferenceEngine {
                 }
             }
 
-//            if (KB.KBMap[i][j].possibleWumpus) {
-//                if (KB.checkSafe(i, j - 1) || KB.checkSafe(i, j + 1) || KB.checkSafe(i - 1, j) || KB.checkSafe(i + 1, j)) {   //For All Room1 possibleWumpus(Room1) && (Safe(RoomNorth) || Safe(RoomEast) || Safe(RoomSouth) || Safe(RoomWest)) => kindSafe(Room1)
-//                    KB.setKindaSafe(i, j);
-//                } else if (KB.checkStench(i, j - 1) && KB.checkStench(i, j + 1) && KB.checkStench(i - 1, j) && KB.checkStench(i + 1, j)) {  //For All Room1 possibleWumpus(Room1) && !(Safe(RoomNorth) || Safe(RoomEast) || Safe(RoomSouth) || Safe(RoomWest)) && (Stench(RoomNorth) && Stench(RoomEast) && Stench(RoomSouth) && Stench(RoomWest)) => Pit(Room1)
-//                    KB.setKnownWumpus(i, j);
-//                }
-//            }
+            if (KB.KBMap[i][j].possibleWumpus) {
+                if (KB.checkSafe(i, j - 1) || KB.checkSafe(i, j + 1) || KB.checkSafe(i - 1, j) || KB.checkSafe(i + 1, j)) {   //For All Room1 possibleWumpus(Room1) && (Safe(RoomNorth) || Safe(RoomEast) || Safe(RoomSouth) || Safe(RoomWest)) => kindSafe(Room1)
+                    KB.setKindaSafe(i, j);
+                } else if (KB.checkStench(i, j - 1) && KB.checkStench(i, j + 1) && KB.checkStench(i - 1, j) && KB.checkStench(i + 1, j)) {  //For All Room1 possibleWumpus(Room1) && !(Safe(RoomNorth) || Safe(RoomEast) || Safe(RoomSouth) || Safe(RoomWest)) && (Stench(RoomNorth) && Stench(RoomEast) && Stench(RoomSouth) && Stench(RoomWest)) => Pit(Room1)
+                    KB.setKnownWumpus(i, j);
+                }
+            }
 
             if (KB.KBMap[i][j].breeze) {
                 if (KB.checkKindaSafe(i, j - 1) && KB.checkKindaSafe(i + 1, j) && KB.checkKindaSafe(i, j + 1)) { //NES
@@ -437,7 +440,14 @@ public class InferenceEngine {
                     KB.setKnownWumpus(i, j - 1);  //For All Room1 Stench(Room1) && (KindaSafe(RoomWest) && KindaSafe(RoomEast) && KindaSafe(RoomSouth)) => Wumpus(RoomNorth)
                 }
             }
+            
+            if(!KB.checkPossibleWumpus(i,j-1) && !KB.checkPossibleWumpus(i,j+1) && !KB.checkPossibleWumpus(i-1,j) && !KB.checkPossibleWumpus(i+1,j) ){
+                if(!KB.checkKnownWumpus(i,j-1) && !KB.checkKnownWumpus(i,j+1) && !KB.checkKnownWumpus(i-1,j) && !KB.checkKnownWumpus(i+1,j)){
+                KB.KBMap[i][j].stench = false;
+                }
+            }
         }
+        
     }
     
     public void printKB(){

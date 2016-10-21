@@ -30,7 +30,7 @@ public class KnowledgeBase {
                 Location l = new Location(i, j);
                 if (!KBMap[i][j].unknown && !KBMap[i][j].knownPit && !KBMap[i][j].knownWumpus && !KBMap[i][j].obstacle) {
                     if (type == 1) {
-                        if (!sameSpotAsCurrent(agent, i, j) && !KBMap[i][j].visited && KBMap[i][j].kindaSafe) {
+                        if (!sameSpotAsCurrent(agent, i, j) && !KBMap[i][j].visited && KBMap[i][j].kindaSafe  && !KBMap[i][j].possiblePit && !KBMap[i][j].possibleWumpus) {
                             desiredSpots.add(l);
                         }
                     } else if (type == 2) {
@@ -65,10 +65,6 @@ public class KnowledgeBase {
         try {
             KBMap[x][y].unknown = false;
             KBMap[x][y].visited = false;
-
-            Location l = new Location(x, y);
-            //int index = desiredSpotsIndexOf(l);
-            //desiredSpots.remove(index);
 
         } catch (IndexOutOfBoundsException e) {
         }
@@ -119,8 +115,11 @@ public class KnowledgeBase {
             KBMap[x][y].possibleWumpus = false;
             KBMap[x][y].possiblePit = false;
 
+            
             Location l = new Location(x, y);
+            if(!listContainsLocation(wump,l)){
             wump.add(l);
+            }
         } catch (IndexOutOfBoundsException e) {
         }
     }
@@ -190,6 +189,21 @@ public class KnowledgeBase {
             return KBMap[x][y].stench;
         } catch (IndexOutOfBoundsException e) {
             return true;
+        }
+    }
+    
+    public boolean checkPossibleWumpus(int x, int y){
+        try {
+            return KBMap[x][y].possibleWumpus;
+        } catch (IndexOutOfBoundsException e) {
+            return false;
+        }
+    }
+    public boolean checkKnownWumpus(int x, int y){
+        try {
+            return KBMap[x][y].knownWumpus;
+        } catch (IndexOutOfBoundsException e) {
+            return false;
         }
     }
 
@@ -335,7 +349,7 @@ public class KnowledgeBase {
         }
         try {
             if (!KBMap[l.i - 1][l.j].knownWumpus && !KBMap[l.i - 1][l.j].knownPit) {
-                if (KBMap[l.i - 1][l.j].safe || KBMap[l.i + 1][l.j].kindaSafe) {
+                if (KBMap[l.i - 1][l.j].safe || KBMap[l.i - 1][l.j].kindaSafe) {
                     if (KBMap[l.i - 1][l.j].visited) {
                         Location adj = new Location(l.i - 1, l.j);
                         if (!listContainsLocation(tempVisited, adj)) {
@@ -350,7 +364,7 @@ public class KnowledgeBase {
         }
         try {
             if (!KBMap[l.i][l.j + 1].knownWumpus && !KBMap[l.i][l.j + 1].knownPit) {
-                if (KBMap[l.i][l.j + 1].safe || KBMap[l.i + 1][l.j].kindaSafe) {
+                if (KBMap[l.i][l.j + 1].safe || KBMap[l.i][l.j + 1].kindaSafe) {
                     if (KBMap[l.i][l.j + 1].visited) {
                         Location adj = new Location(l.i, l.j + 1);
                         if (!listContainsLocation(tempVisited, adj)) {
@@ -365,7 +379,7 @@ public class KnowledgeBase {
         }
         try {
             if (!KBMap[l.i][l.j - 1].knownWumpus && !KBMap[l.i][l.j - 1].knownPit) {
-                if (KBMap[l.i][l.j - 1].safe || KBMap[l.i + 1][l.j].kindaSafe) {
+                if (KBMap[l.i][l.j - 1].safe || KBMap[l.i][l.j - 1].kindaSafe) {
                     if (KBMap[l.i][l.j - 1].visited) {
                         Location adj = new Location(l.i, l.j - 1);
                         if (!listContainsLocation(tempVisited, adj)) {
@@ -512,9 +526,7 @@ public class KnowledgeBase {
 
                 if (KBMap[i][j].unknown) {
                     System.out.print("| U ");
-                    if (KBMap[i][j].kindaSafe) {
-                        System.out.print("K");
-                    }
+
                 }else if (KBMap[i][j].safe) {
                     System.out.print("| S");
 
@@ -526,6 +538,9 @@ public class KnowledgeBase {
 
                 } else if (KBMap[i][j].breeze) {
                     System.out.print("|B");
+                    if (KBMap[i][j].stench) {
+                        System.out.print("T");
+                    }
                     if (KBMap[i][j].visited) {
                         System.out.print("V");
                     } else {
@@ -545,13 +560,16 @@ public class KnowledgeBase {
                     }
                 } else if (KBMap[i][j].stench) {
                     System.out.print("|T");
+                    if (KBMap[i][j].breeze) {
+                        System.out.print("B");
+                    }
                     if (KBMap[i][j].visited) {
                         System.out.print("V");
                     } else {
                         System.out.print(" ");
                     }
 
-                    if (KBMap[i][j].visited) {
+                    if (KBMap[i][j].kindaSafe) {
                         System.out.print("K");
                     } else {
                         System.out.print(" ");
@@ -587,7 +605,17 @@ public class KnowledgeBase {
                     System.out.print("Y");
                 } else if (KBMap[i][j].possibleWumpus) {
                     System.out.print("| Q ");
+                } else if (KBMap[i][j].kindaSafe) {
+                        System.out.print("| k");
+                        if (KBMap[i][j].visited) {
+                        System.out.print("V");
+                    }else {
+                        System.out.print(" ");
+                    }
+                } else {
+                    System.out.println("wut");
                 }
+                
 
             }
             System.out.print("|\n");

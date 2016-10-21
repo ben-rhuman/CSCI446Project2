@@ -83,13 +83,11 @@ public class Map {
 
                     setBreeze(i, j);
 
-                    Location l = new Location(i, j);
-                    wumpusList.add(l);
-
                 } else if (rNum > p && rNum <= w) {  //a wumpus was chosen
                     world[i][j].setRoom('w');
                     setStench(i, j);
-
+                    Location l = new Location(i, j);
+                    wumpusList.add(l);
                 } else {                            //empty space was chosen
                     world[i][j].setRoom('e');
 
@@ -300,7 +298,7 @@ public class Map {
     }
 
     public int getNumberWumpus() {
-        return 100;//wumpusList.size();
+        return wumpusList.size();
     }
 /////////////////End Agent Interfacing Methods//////////////////////
 

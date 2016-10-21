@@ -54,6 +54,8 @@ public class Agent {
             worldMap.print(currentLocation, direction);
             
             TELL();
+            IE.printKB();
+            
             plan = ASK();
             executePlan(plan);
         }

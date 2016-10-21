@@ -1,4 +1,3 @@
-
 package KnowledgeBasePackage;
 
 public class KBRoom {
@@ -35,5 +34,22 @@ public class KBRoom {
     stench = false;
     glitter = false;
     }
+    
+    public void printRoom(int i, int j){
+        System.out.println("i: "+ i);
+        System.out.println("j: "+ j);
+        System.out.println("unkown: "+ unknown);
+        System.out.println("safe: "+ safe);
+        System.out.println("kindaSafe: "+ kindaSafe);
+        System.out.println("knownWumpus: "+ knownWumpus);
+        System.out.println("possibleWumpus: "+ possibleWumpus);
+        System.out.println("knownPit: "+ knownPit);
+        System.out.println("possiblePit: "+ possiblePit);
+        System.out.println("obstacle: "+ obstacle);
+        System.out.println("visited: "+ visited);
+        System.out.println("breeze: "+ breeze);
+        System.out.println("stench: "+ stench);
+        
+        
+    }
 }
-
