@@ -9,7 +9,7 @@ import java.util.Scanner;
 public class WumpusWorld {
 
     public static void main(String[] args) {
-        int size = 5;
+        int size = 3;
         double pitP = .0;
         double obstacleP = .0;
         double wumpusP = 1;
@@ -17,15 +17,9 @@ public class WumpusWorld {
         
         Map m = new Map(size, pitP, obstacleP, wumpusP);
         
-        
-        Agent a =  new Agent(0, 0, 1, 2, m);
-        
-        //changed the CreatedesiredSpots to exclude possible pits/wump
-        
-        
-        //so far the agent moves accordingly for now just need inference rules
-        //changed rightNextToSpot to see if the spots are the same
-        //changed rightDirection method to different north and south
+        ReactiveAgent r = new ReactiveAgent(0,0,1,2,m);
+        //Agent a =  new Agent(0, 0, 1, 2, m);
+
     }
 
 }

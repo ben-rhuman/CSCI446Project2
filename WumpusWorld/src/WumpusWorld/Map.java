@@ -104,9 +104,7 @@ public class Map {
 
         for (int k = 0; k < wumpusList.size(); k++) { //remove the wumpus from the list of wumpi
 
-            Location w = wumpusList.get(k);
-
-            if (i == w.i && j == w.j) {
+            if (i == wumpusList.get(k).i && j == wumpusList.get(k).j) {
                 wumpusList.remove(k);
                 break;
             }
@@ -114,9 +112,9 @@ public class Map {
 
         for (int k = 0; k < world.length; k++) { //remove all of the stench from the world
             for (int l = 0; l < world.length; l++) {
-                if (world[k][l].getStench() == true) {
-                    world[k][l].removeStench();
-                }
+
+                world[k][l].removeStench();
+
             }
         }
 
@@ -179,6 +177,7 @@ public class Map {
 ///////////////////End Setting Methods//////////////////////////////
 /////////////////////Agent Interfacing Methods//////////////////////
     public boolean[] move(Location location, int direction) {
+
         boolean[] percept = {
             false, //(0)Move suceeded (True) move failed/wall (False)
             false, //(1)New room obstacle
@@ -189,14 +188,31 @@ public class Map {
             false, //(6)New room is gold
             false
         };
+
         try {
             if (direction == 1) {
+                if (location.i < 0 || location.i >= world.length || location.j-1 < 0 && location.j >= world.length) {
+                    percept[1] = true;
+                    return percept;
+                }
                 percept = checkPercepts(world[location.i][location.j - 1]);
             } else if (direction == 2) {
+                if (location.i < 0 || location.i+1 >= world.length || location.j < 0 && location.j >= world.length) {
+                    percept[1] = true;
+                    return percept;
+                }
                 percept = checkPercepts(world[location.i + 1][location.j]);
             } else if (direction == 3) {
+                if (location.i < 0 || location.i >= world.length || location.j < 0 && location.j+1 >= world.length) {
+                    percept[1] = true;
+                    return percept;
+                }
                 percept = checkPercepts(world[location.i][location.j + 1]);
             } else {
+                if (location.i-1 < 0 || location.i >= world.length || location.j < 0 && location.j >= world.length) {
+                    percept[1] = true;
+                    return percept;
+                }
                 percept = checkPercepts(world[location.i - 1][location.j]);
             }
         } catch (IndexOutOfBoundsException e) {
@@ -206,6 +222,7 @@ public class Map {
     }
 
     public boolean[] checkPercepts(Room room) {
+
         boolean[] percept = new boolean[8];
         percept[0] = true;
 
