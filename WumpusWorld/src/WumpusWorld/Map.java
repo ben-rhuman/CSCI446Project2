@@ -191,29 +191,29 @@ public class Map {
 
         try {
             if (direction == 1) {
-                if (location.i < 0 || location.i >= world.length || location.j-1 < 0 && location.j >= world.length) {
-                    percept[1] = true;
-                    return percept;
-                }
+                
                 percept = checkPercepts(world[location.i][location.j - 1]);
+                if (location.i < 0 || location.i >= world.length || location.j-1 < 0 && location.j >= world.length) {
+                    percept[0] = false;        
+                }
             } else if (direction == 2) {
-                if (location.i < 0 || location.i+1 >= world.length || location.j < 0 && location.j >= world.length) {
-                    percept[1] = true;
-                    return percept;
-                }
+                
                 percept = checkPercepts(world[location.i + 1][location.j]);
+                if (location.i < 0 || location.i+1 >= world.length || location.j < 0 && location.j >= world.length) {
+                    percept[0] = false;
+                }
             } else if (direction == 3) {
-                if (location.i < 0 || location.i >= world.length || location.j < 0 && location.j+1 >= world.length) {
-                    percept[1] = true;
-                    return percept;
-                }
+                
                 percept = checkPercepts(world[location.i][location.j + 1]);
-            } else {
-                if (location.i-1 < 0 || location.i >= world.length || location.j < 0 && location.j >= world.length) {
-                    percept[1] = true;
-                    return percept;
+                if (location.i < 0 || location.i >= world.length || location.j < 0 && location.j+1 >= world.length) {
+                    percept[0] = false;
                 }
+            } else {
+                
                 percept = checkPercepts(world[location.i - 1][location.j]);
+                if (location.i-1 < 0 || location.i >= world.length || location.j < 0 && location.j >= world.length) {
+                    percept[0] = false; 
+                }
             }
         } catch (IndexOutOfBoundsException e) {
             percept[0] = false;

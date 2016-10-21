@@ -10,9 +10,9 @@ public class WumpusWorld {
 
     public static void main(String[] args) {
         int size = 3;
-        double pitP = .0;
+        double pitP = .3;
         double obstacleP = .0;
-        double wumpusP = 1;
+        double wumpusP = .0;
 
         
         Map m = new Map(size, pitP, obstacleP, wumpusP);

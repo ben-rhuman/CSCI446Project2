@@ -39,8 +39,8 @@ public class ReactiveAgent {
         this.direction = direction;
         this.worldMap = worldMap;
         arrowCount = worldMap.getNumberWumpus();
-        
 
+        percept = worldMap.checkPerceptAtLocation(currentLocation);
         playGame();
     }
 
@@ -48,36 +48,51 @@ public class ReactiveAgent {
     private void playGame() {
         done = false;
 
-        while (done != true) {
+        for (int i = 0; i < worldMap.size * 20; i++) {
+            if (done == true) {
+                break;
+            }
+            
+            if(percept[0]){
             percept = worldMap.checkPerceptAtLocation(currentLocation);
+            }
             worldMap.print(currentLocation, direction);
             printPercepts(percept, currentLocation);
+
             reactiveMove();
+
+        }
+        System.out.println("Got trapped");
+
+    }
+
+    private void resetPercepts() {
+        for (int i = 0; i < percept.length; i++) {
+            percept[i] = false;
         }
     }
 
     private void reactiveMove() {
-        
-        
+
         if (percept[6]) {		//New room is Gold
             if (grab()) {
                 win();
             }
-        } else if ( percept[1]) {		//New room obstacle
-            
-            
+        } else if (percept[1]) {		//New room obstacle
+            updateLocationBackward();
+
         } else if (percept[3]) {		//Sense a wumpus
             if (arrowCount == 0) {
-                if(moveRand()){
-                updateLocationForward();
+                if (moveRand()) {
+                    updateLocationForward();
                 }
-            } else {
-                shootArrow();
+            } else if (!shootArrow()) {
                 turnRight();
+
             }
-        }  else if (percept[2]) {		//Sense a breeze
-            if(moveRand()){
-            updateLocationForward();
+        } else if (percept[2]) {		//Sense a breeze
+            if (moveRand()) {
+                updateLocationForward();
             }
         } else if (percept[4]) {		//New room is Pit
             System.out.println("Fell in a pit.");
@@ -85,12 +100,10 @@ public class ReactiveAgent {
         } else if (percept[5]) {		//New room is Wumpus
             System.out.println("Eaten by a Wumpus.");
             payOff -= 100;
-        } else {
-            if(moveRand()){
+        } else if (moveRand()) {
             updateLocationForward();
-            }
         }
-       
+
     }
 
     private boolean moveRand() {
@@ -108,7 +121,7 @@ public class ReactiveAgent {
         } else if (dir > .75) {
             percept = move();
         }
-        return percept[1];
+        return percept[0];
     }
 
     private void updateLocationForward() {
@@ -122,6 +135,7 @@ public class ReactiveAgent {
             currentLocation.i--;
         }
     }
+
     private void updateLocationBackward() {
         if (direction == 1) {
             currentLocation.j++;
