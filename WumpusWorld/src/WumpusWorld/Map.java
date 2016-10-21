@@ -78,17 +78,17 @@ public class Map {
                 if (rNum <= obs) { // an obstacle was chosen
                     world[i][j].setRoom('o');
 
-                } else if (rNum > obs && rNum <= p) { //a wumpus was chosen
-                    world[i][j].setRoom('w');
+                } else if (rNum > obs && rNum <= p) { //a pit was chosen
+                    world[i][j].setRoom('p');
 
-                    setStench(i, j);
+                    setBreeze(i, j);
 
                     Location l = new Location(i, j);
                     wumpusList.add(l);
 
-                } else if (rNum > p && rNum <= w) {  //a pit was chosen
-                    world[i][j].setRoom('p');
-                    setBreeze(i, j);
+                } else if (rNum > p && rNum <= w) {  //a wumpus was chosen
+                    world[i][j].setRoom('w');
+                    setStench(i, j);
 
                 } else {                            //empty space was chosen
                     world[i][j].setRoom('e');
@@ -256,17 +256,7 @@ public class Map {
         //false = no scream
 
         if (d == 1) { //shoot arrow north
-            for (int i = l.i; i >= 0; i--) {
-                if (world[i][l.j].getRoom() == 'o') {
-                    return false;
-                }
-                if (world[i][l.j].getRoom() == 'w') {
-                    removeWumpus(i, l.j);
-                    return true;
-                }
-            }
-        } else if (d == 2) { //shoot arrow east
-            for (int j = l.i; j < size; j++) {
+            for (int j = l.j; j >= 0; j--) {
                 if (world[l.i][j].getRoom() == 'o') {
                     return false;
                 }
@@ -275,7 +265,7 @@ public class Map {
                     return true;
                 }
             }
-        } else if (d == 3) { //shoot arrow south
+        } else if (d == 2) { //shoot arrow east
             for (int i = l.i; i < size; i++) {
                 if (world[i][l.j].getRoom() == 'o') {
                     return false;
@@ -285,8 +275,8 @@ public class Map {
                     return true;
                 }
             }
-        } else { //shoot arrow west
-            for (int j = l.i; j >= 0; j--) {
+        } else if (d == 3) { //shoot arrow south
+            for (int j = l.j; j < size; j++) {
                 if (world[l.i][j].getRoom() == 'o') {
                     return false;
                 }
@@ -295,20 +285,56 @@ public class Map {
                     return true;
                 }
             }
+        } else { //shoot arrow west
+            for (int i = l.i; i >= 0; i--) {
+                if (world[i][l.j].getRoom() == 'o') {
+                    return false;
+                }
+                if (world[i][l.j].getRoom() == 'w') {
+                    removeWumpus(i, l.j);
+                    return true;
+                }
+            }
         }
         return false;
     }
 
+    public int getNumberWumpus() {
+        return 100;//wumpusList.size();
+    }
 /////////////////End Agent Interfacing Methods//////////////////////
-    public void print() {
 
+    public void print(Location agentLoc, int direction) {
+        System.out.println();
+        printLine();
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-
-                System.out.print(world[j][i].getRoom());
+                if (agentLoc.i == j && agentLoc.j == i) {
+                    if (direction == 1) {
+                        System.out.print("| A ");
+                    } else if (direction == 2) {
+                        System.out.print("| > ");
+                    } else if (direction == 3) {
+                        System.out.print("| V ");
+                    } else {
+                        System.out.print("| < ");
+                    }
+                } else {
+                    System.out.print("| " + world[j][i].getRoom() + " ");
+                }
             }
-            System.out.println("");
+            System.out.print("|\n");
+            printLine();
         }
+        System.out.println();
+    }
+
+    private void printLine() {
+        System.out.print("|");
+        for (int i = 0; i < size; i++) {
+            System.out.print("---|");
+        }
+        System.out.println();
     }
 
     public void printAttributes() {

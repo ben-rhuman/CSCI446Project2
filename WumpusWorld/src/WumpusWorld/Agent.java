@@ -16,6 +16,8 @@ public class Agent {
     private int payOff;
     private int direction; //1 = North, 2 = East, 3 = South, 4 = West
     private int moveCounter;
+    private int wumpusesKilled;
+    private int timesDied;
     private Location currentLocation;
     private int arrowCount;
     private Map worldMap;
@@ -31,15 +33,16 @@ public class Agent {
 //(6)New room is gold
 
     public Agent(int x, int y, int numGold, int direction, Map worldMap) {  //Direction in our case should always be 2 (i.e. East) at start.
-       currentLocation = new Location(x,y);
+        currentLocation = new Location(x, y);
         this.payOff = numGold;
         this.direction = direction;
         this.worldMap = worldMap;
-
+        arrowCount = worldMap.getNumberWumpus();
+        
         IE = new InferenceEngine(worldMap.size);
 
         percept = worldMap.checkPerceptAtLocation(currentLocation);
-        
+
         playGame();
     }
 
@@ -48,6 +51,8 @@ public class Agent {
         done = false;
         ArrayList<Integer> plan;
         while (done != true) {
+            worldMap.print(currentLocation, direction);
+            
             TELL();
             plan = ASK();
             executePlan(plan);
@@ -73,15 +78,15 @@ public class Agent {
             case 3: //(3) forward
                 percept = move();
                 if (!percept[0] || percept[1]) { //If move failed (0) or obstacle (1) 
-                    if(percept[4]){ //
+                    if (percept[4]) { //
                         System.out.println("Fell in a pit.");
                         payOff -= 100;
                     }
-                    if(percept[5]){
+                    if (percept[5]) {
                         System.out.println("Eaten by a wumpus.");
                         payOff -= 100;
                     }
-                    if (percept[1]){
+                    if (percept[1]) {
                         System.out.println("Hit an obstacle.");
                     }
                     //Leave location alone
@@ -96,6 +101,12 @@ public class Agent {
                 break;
             case 5: //(5) shoot
                 percept[7] = shootArrow();  //Updates the scream percept if a wumpus is killed
+                percept[5] = false;
+                TELL();
+                percept[7] = false;            
+                break;
+            default:
+                System.out.println("ERROR: executePlan() hit default case.");
                 break;
         }
 
@@ -117,18 +128,26 @@ public class Agent {
 
     private void win() {
         System.out.println("The Agent Found The Gold And Won!");
+        payOff += 1000;
         printStats();
         done = true;
     }
 
     private void printStats() {
-
+        System.out.println("Final Map");
+        worldMap.print(currentLocation, direction);
+        System.out.println("Statistics:");
+        System.out.println("    Final Gold: " + payOff);
+        System.out.println("    Total number of moves: " + moveCounter);
+        System.out.println("    Wumpuses Killed: " + wumpusesKilled);
+        System.out.println("    Times died: " + timesDied);
     }
 
 ////////////////////////// End Game Execution Functions ////////////////////////////
 //////////////////////// Agent Action Methods //////////////////////////////////
     private boolean[] move() { //Moves the agent one space in the direction its facing.
         moveCounter++;
+        payOff -= 1;
         System.out.println(moveCounter + ": Moved forward.");
         return worldMap.move(currentLocation, direction);  //Returns a list of 7 percepts
     }
@@ -139,7 +158,7 @@ public class Agent {
         } else {
             direction--;
         }
-        payOff -= 10;
+        payOff -= 1;
         moveCounter++;
         System.out.println(moveCounter + ": Turned left.");
     }
@@ -150,7 +169,7 @@ public class Agent {
         } else {
             direction++;
         }
-        payOff -= 10;
+        payOff -= 1;
         moveCounter++;
         System.out.println(moveCounter + ": Turned right.");
     }
@@ -186,39 +205,46 @@ public class Agent {
     //////////////////////// End Agent Action Methods //////////////////////////////////
     //////////////////////////// Agent - Inference Engine Methods ////////////////////////////
     private void TELL() {
-        
+
         IE.TELL(percept, currentLocation, direction, arrowCount);   // Tells the IE what the current percepts are
         printPercepts(percept, currentLocation);
-        
-    
+
     }
 
     private ArrayList ASK() {
         return IE.ASK();  //Asks the IE what move it should take. 
     }
-    
-    public void printPercepts(boolean[] percept,Location currentLocation){
-        for(int i = 0; i < percept.length; i++){
-            switch(i){
-                case 0: System.out.println("Move suceeded/failed: " + percept[i]);
+
+    public void printPercepts(boolean[] percept, Location currentLocation) {
+        for (int i = 0; i < percept.length; i++) {
+            switch (i) {
+                case 0:
+                    System.out.println("Move suceeded/failed: " + percept[i]);
                     break;
-                case 1: System.out.println("New room obstacle: " + percept[i]);
+                case 1:
+                    System.out.println("New room obstacle: " + percept[i]);
                     break;
-                case 2: System.out.println("New room is breezy: " + percept[i]);
+                case 2:
+                    System.out.println("New room is breezy: " + percept[i]);
                     break;
-                case 3: System.out.println("New room is stinky: " + percept[i]);
+                case 3:
+                    System.out.println("New room is stinky: " + percept[i]);
                     break;
-                case 4: System.out.println("New room has pit: " + percept[i]);
+                case 4:
+                    System.out.println("New room has pit: " + percept[i]);
                     break;
-                case 5: System.out.println("New room has wumpus: " + percept[i]);
+                case 5:
+                    System.out.println("New room has wumpus: " + percept[i]);
                     break;
-                case 6: System.out.println("New room has gold: " + percept[i]);
+                case 6:
+                    System.out.println("New room has gold: " + percept[i]);
                     break;
-                case 7: System.out.println("Hear wumpus scream: " + percept[i]);
+                case 7:
+                    System.out.println("Hear wumpus scream: " + percept[i]);
                     break;
-                
+
+            }
         }
-        }
-        System.out.println("currentLocation" + currentLocation.i + " " + currentLocation.j);
+        System.out.println("currentLocation: (" + currentLocation.i + ", " + currentLocation.j + ")");
     }
 }

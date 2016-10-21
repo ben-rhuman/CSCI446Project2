@@ -30,7 +30,7 @@ public class KnowledgeBase {
                 Location l = new Location(i, j);
                 if (!KBMap[i][j].unknown && !KBMap[i][j].knownPit && !KBMap[i][j].knownWumpus && !KBMap[i][j].obstacle) {
                     if (type == 1) {
-                        if (!sameSpotAsCurrent(agent, i, j) && !KBMap[i][j].visited && KBMap[i][j].kindaSafe ) {
+                        if (!sameSpotAsCurrent(agent, i, j) && !KBMap[i][j].visited && KBMap[i][j].kindaSafe) {
                             desiredSpots.add(l);
                         }
                     } else if (type == 2) {
@@ -43,12 +43,13 @@ public class KnowledgeBase {
         }
     }
 
-    public boolean sameSpotAsCurrent(Location agent, int i, int j){
-        if(agent.i == i && agent.j == j){
+    public boolean sameSpotAsCurrent(Location agent, int i, int j) {
+        if (agent.i == i && agent.j == j) {
             return true;
         }
         return false;
     }
+
     public int desiredSpotsIndexOf(Location l) {
         int index = 0;
         for (int i = 0; i < desiredSpots.size(); i++) {
@@ -152,6 +153,8 @@ public class KnowledgeBase {
             KBMap[x][y].kindaSafe = true;
             KBMap[x][y].possibleWumpus = false;
             KBMap[x][y].possiblePit = false;
+            KBMap[x][y].knownWumpus = false;
+            KBMap[x][y].knownPit = false;
         } catch (IndexOutOfBoundsException e) {
         }
     }
@@ -163,6 +166,30 @@ public class KnowledgeBase {
             return KBMap[x][y].safe;
         } catch (IndexOutOfBoundsException e) {
             return false;
+        }
+    }
+
+    public boolean checkKindaSafe(int x, int y) {
+        try {
+            return KBMap[x][y].kindaSafe;
+        } catch (IndexOutOfBoundsException e) {
+            return true;
+        }
+    }
+
+    public boolean checkBreeze(int x, int y) {
+        try {
+            return KBMap[x][y].breeze;
+        } catch (IndexOutOfBoundsException e) {
+            return true;
+        }
+    }
+
+    public boolean checkStench(int x, int y) {
+        try {
+            return KBMap[x][y].stench;
+        } catch (IndexOutOfBoundsException e) {
+            return true;
         }
     }
 
@@ -215,28 +242,28 @@ public class KnowledgeBase {
 
     ///==================Checking Knowlege Base from Inference Engine====================
     public Location getClosestDesiredSpot(Location current) {
-        if(!desiredSpots.isEmpty()){
-        Location currentClosest = desiredSpots.get(0);
-        double currentDistance = Double.MAX_VALUE;
+        if (!desiredSpots.isEmpty()) {
+            Location currentClosest = desiredSpots.get(0);
+            double currentDistance = Double.MAX_VALUE;
 
-        for (int i = 0; i < desiredSpots.size(); i++) {
+            for (int i = 0; i < desiredSpots.size(); i++) {
 
-            double x1 = (double) current.i;
-            double y1 = (double) current.j;
+                double x1 = (double) current.i;
+                double y1 = (double) current.j;
 
-            double x2 = (double) desiredSpots.get(i).i;
-            double y2 = (double) desiredSpots.get(i).j;
+                double x2 = (double) desiredSpots.get(i).i;
+                double y2 = (double) desiredSpots.get(i).j;
 
-            double distance2 = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+                double distance2 = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 
-            if (distance2 <= currentDistance) {
-                currentDistance = distance2;
-                currentClosest = desiredSpots.get(i);
+                if (distance2 <= currentDistance) {
+                    currentDistance = distance2;
+                    currentClosest = desiredSpots.get(i);
+                }
+
             }
 
-        }
-        
-        return currentClosest;
+            return currentClosest;
         }
         return null;
     }
@@ -293,14 +320,14 @@ public class KnowledgeBase {
 
         try {
             if (!KBMap[l.i + 1][l.j].knownWumpus && !KBMap[l.i + 1][l.j].knownPit) {
-                if (KBMap[l.i + 1][l.j].safe ||  KBMap[l.i + 1][l.j].kindaSafe) {
-                    if(KBMap[l.i + 1][l.j].visited){
-                    Location adj = new Location(l.i + 1, l.j);
-                    if (!listContainsLocation(tempVisited, adj)) {
-                        adj.dir = 2;
-                        adjacents.add(adj);
+                if (KBMap[l.i + 1][l.j].safe || KBMap[l.i + 1][l.j].kindaSafe) {
+                    if (KBMap[l.i + 1][l.j].visited) {
+                        Location adj = new Location(l.i + 1, l.j);
+                        if (!listContainsLocation(tempVisited, adj)) {
+                            adj.dir = 2;
+                            adjacents.add(adj);
+                        }
                     }
-                }
                 }
             }
         } catch (IndexOutOfBoundsException e) {
@@ -308,13 +335,13 @@ public class KnowledgeBase {
         }
         try {
             if (!KBMap[l.i - 1][l.j].knownWumpus && !KBMap[l.i - 1][l.j].knownPit) {
-                if (KBMap[l.i - 1][l.j].safe ||  KBMap[l.i + 1][l.j].kindaSafe) {
-                    if(KBMap[l.i - 1][l.j].visited){
-                    Location adj = new Location(l.i - 1, l.j);
-                    if (!listContainsLocation(tempVisited, adj)) {
-                        adj.dir = 4;
-                        adjacents.add(adj);
-                    }
+                if (KBMap[l.i - 1][l.j].safe || KBMap[l.i + 1][l.j].kindaSafe) {
+                    if (KBMap[l.i - 1][l.j].visited) {
+                        Location adj = new Location(l.i - 1, l.j);
+                        if (!listContainsLocation(tempVisited, adj)) {
+                            adj.dir = 4;
+                            adjacents.add(adj);
+                        }
                     }
                 }
             }
@@ -323,14 +350,14 @@ public class KnowledgeBase {
         }
         try {
             if (!KBMap[l.i][l.j + 1].knownWumpus && !KBMap[l.i][l.j + 1].knownPit) {
-                if (KBMap[l.i][l.j + 1].safe ||  KBMap[l.i + 1][l.j].kindaSafe) {
-                    if(KBMap[l.i][l.j + 1].visited){
-                    Location adj = new Location(l.i, l.j + 1);
-                    if (!listContainsLocation(tempVisited, adj)) {
-                        adj.dir = 3;
-                        adjacents.add(adj);
+                if (KBMap[l.i][l.j + 1].safe || KBMap[l.i + 1][l.j].kindaSafe) {
+                    if (KBMap[l.i][l.j + 1].visited) {
+                        Location adj = new Location(l.i, l.j + 1);
+                        if (!listContainsLocation(tempVisited, adj)) {
+                            adj.dir = 3;
+                            adjacents.add(adj);
+                        }
                     }
-                }
                 }
             }
         } catch (IndexOutOfBoundsException e) {
@@ -338,14 +365,14 @@ public class KnowledgeBase {
         }
         try {
             if (!KBMap[l.i][l.j - 1].knownWumpus && !KBMap[l.i][l.j - 1].knownPit) {
-                if (KBMap[l.i][l.j - 1].safe ||  KBMap[l.i + 1][l.j].kindaSafe) {
-                   if (KBMap[l.i][l.j - 1].visited){
-                    Location adj = new Location(l.i, l.j - 1);
-                    if (!listContainsLocation(tempVisited, adj)) {
-                        adj.dir = 1;
-                        adjacents.add(adj);
+                if (KBMap[l.i][l.j - 1].safe || KBMap[l.i + 1][l.j].kindaSafe) {
+                    if (KBMap[l.i][l.j - 1].visited) {
+                        Location adj = new Location(l.i, l.j - 1);
+                        if (!listContainsLocation(tempVisited, adj)) {
+                            adj.dir = 1;
+                            adjacents.add(adj);
+                        }
                     }
-                   }
                 }
             }
         } catch (IndexOutOfBoundsException e) {
@@ -356,7 +383,7 @@ public class KnowledgeBase {
     }
 
     public boolean rightDirection(Location ag, int dir, Location spot) { //check if the agent is pointing towards the spot
-        
+
         if (ag.i < spot.i && ag.j == spot.j) { //if agent is left of spot
             if (dir == 2) {
                 return true;
@@ -379,9 +406,9 @@ public class KnowledgeBase {
 
     public ArrayList getTurnPlan(int dir1, int dir2) { //returns a plan to go from one direction to another
         ArrayList<Integer> turnPlan = new ArrayList<>();
-        if(dir1 == dir2){
+        if (dir1 == dir2) {
             return turnPlan;
-        }else if ((dir1 % 2 == 0) && (dir2 % 2 == 0)) { //if both even
+        } else if ((dir1 % 2 == 0) && (dir2 % 2 == 0)) { //if both even
             turnPlan.add(2);
             turnPlan.add(2);
         } else if ((dir1 % 2 != 0) && (dir2 % 2 != 0)) { //if both odd
@@ -439,39 +466,141 @@ public class KnowledgeBase {
 
         return false;
     }
-    
-    public boolean rightNextToSpot(Location current, Location spot){
-        if(current.i == spot.i && current.j == spot.j){
+
+    public boolean rightNextToSpot(Location current, Location spot) {
+        if (current.i == spot.i && current.j == spot.j) {
             return true;
         }
-        try{
-            if((current.i - 1) == spot.i && current.j == spot.j){
+        try {
+            if ((current.i - 1) == spot.i && current.j == spot.j) {
                 return true;
             }
-        }catch (IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
         }
-        
-        try{
-            if((current.i + 1) == spot.i && current.j == spot.j){
+
+        try {
+            if ((current.i + 1) == spot.i && current.j == spot.j) {
                 return true;
             }
-        }catch (IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
         }
-        
-        try{
-            if(current.i == spot.i && (current.j - 1) == spot.j){
+
+        try {
+            if (current.i == spot.i && (current.j - 1) == spot.j) {
                 return true;
             }
-        }catch (IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
         }
-        
-        try{
-            if(current.i == spot.i && (current.j + 1) == spot.j){
+
+        try {
+            if (current.i == spot.i && (current.j + 1) == spot.j) {
                 return true;
             }
-        }catch (IndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
         }
-        
+
         return false;
+    }
+
+    ///////////////////////////// KB Print /////////////////////////////
+    public void print() {
+        System.out.println("Knowledge Base State:");
+        System.out.println();
+        printLine();
+        for (int j = 0; j < KBMap.length; j++) {
+            for (int i = 0; i < KBMap.length; i++) {
+
+                if (KBMap[i][j].unknown) {
+                    System.out.print("| U ");
+                    if (KBMap[i][j].kindaSafe) {
+                        System.out.print("K");
+                    }
+                }else if (KBMap[i][j].safe) {
+                    System.out.print("| S");
+
+                    if (KBMap[i][j].visited) {
+                        System.out.print("V");
+                    } else {
+                        System.out.print(" ");
+                    }
+
+                } else if (KBMap[i][j].breeze) {
+                    System.out.print("|B");
+                    if (KBMap[i][j].visited) {
+                        System.out.print("V");
+                    } else {
+                        System.out.print(" ");
+                    }
+
+                    if (KBMap[i][j].kindaSafe) {
+                        System.out.print("K");
+                    } else {
+                        System.out.print(" ");
+                    }
+                    if (KBMap[i][j].possiblePit) {
+                        System.out.print("Y");
+                    }
+                    if (KBMap[i][j].possibleWumpus) {
+                        System.out.print("| Q ");
+                    }
+                } else if (KBMap[i][j].stench) {
+                    System.out.print("|T");
+                    if (KBMap[i][j].visited) {
+                        System.out.print("V");
+                    } else {
+                        System.out.print(" ");
+                    }
+
+                    if (KBMap[i][j].visited) {
+                        System.out.print("K");
+                    } else {
+                        System.out.print(" ");
+                    }
+                    if (KBMap[i][j].possiblePit) {
+                        System.out.print("Y");
+                    }
+                    if (KBMap[i][j].possibleWumpus) {
+                        System.out.print("| Q ");
+                    }
+                } else if (KBMap[i][j].knownWumpus) {
+                    System.out.print("| W");
+                    if (KBMap[i][j].visited) {
+                        System.out.print("V");
+                    } else {
+                        System.out.print(" ");
+                    }
+                } else if (KBMap[i][j].knownPit) {
+                    System.out.print("| P");
+                    if (KBMap[i][j].visited) {
+                        System.out.print("V");
+                    } else {
+                        System.out.print(" ");
+                    }
+                } else if (KBMap[i][j].obstacle) {
+                    System.out.print("| O");
+                    if (KBMap[i][j].visited) {
+                        System.out.print("V");
+                    } else {
+                        System.out.print(" ");
+                    }
+                } else if (KBMap[i][j].possiblePit) {
+                    System.out.print("Y");
+                } else if (KBMap[i][j].possibleWumpus) {
+                    System.out.print("| Q ");
+                }
+
+            }
+            System.out.print("|\n");
+            printLine();
+        }
+        System.out.println();
+    }
+
+    private void printLine() {
+        System.out.print("|");
+        for (int i = 0; i < KBMap.length; i++) {
+            System.out.print("---|");
+        }
+        System.out.println();
     }
 }

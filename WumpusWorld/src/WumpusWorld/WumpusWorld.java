@@ -10,13 +10,13 @@ public class WumpusWorld {
 
     public static void main(String[] args) {
         int size = 5;
-        double pitP = .05;
-        double obstacleP = .05;
-        double wumpusP = .05;
+        double pitP = .0;
+        double obstacleP = .0;
+        double wumpusP = 1;
 
         
         Map m = new Map(size, pitP, obstacleP, wumpusP);
-        m.print();
+        
         
         Agent a =  new Agent(0, 0, 1, 2, m);
         
