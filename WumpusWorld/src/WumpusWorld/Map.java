@@ -15,6 +15,7 @@ public class Map {
     public int size;             //size of world   
     private List<Location> wumpusList = new ArrayList();
     private Location goldLocation;
+    private int numObstacles;
 
     public Map(int size, double p, double obs, double w) {
 
@@ -77,6 +78,7 @@ public class Map {
 
                 if (rNum <= obs) { // an obstacle was chosen
                     world[i][j].setRoom('o');
+                    numObstacles++;
 
                 } else if (rNum > obs && rNum <= p) { //a pit was chosen
                     world[i][j].setRoom('p');
@@ -316,6 +318,9 @@ public class Map {
 
     public int getNumberWumpus() {
         return wumpusList.size();
+    }
+    public int getNumberObstacles() {
+        return numObstacles;
     }
 /////////////////End Agent Interfacing Methods//////////////////////
 

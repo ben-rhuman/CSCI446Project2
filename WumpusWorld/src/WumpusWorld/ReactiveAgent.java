@@ -18,12 +18,18 @@ public class ReactiveAgent {
     private int direction; //1 = North, 2 = East, 3 = South, 4 = West
     private int moveCounter;
     private int wumpusesKilled;
-    private int timesDied;
+    private int deathByWump;
+    private int deathByPit;
+    private int obstacleBump;
+    private int uniqueVisitedSpots;
     private Location currentLocation;
     private int arrowCount;
     private Map worldMap;
     private boolean done;
     private boolean[] percept;
+    private KnowledgeBase KB;
+    
+    
 //(0)Move suceeded (True) move failed/wall (False)
 //(1)New room obstacle
 //(2)New room is breezy room 
@@ -34,12 +40,17 @@ public class ReactiveAgent {
 
     public ReactiveAgent(int x, int y, int numGold, int direction, Map worldMap) {  //Direction in our case should always be 2 (i.e. East) at start.
 
+        KB = new KnowledgeBase(worldMap.size);
+        
         currentLocation = new Location(x, y);
         this.payOff = numGold;
         this.direction = direction;
         this.worldMap = worldMap;
         arrowCount = worldMap.getNumberWumpus();
 
+        System.out.println("Initial Map State : " + worldMap.size  + " X " + worldMap.size);
+        worldMap.print(currentLocation, direction);
+        
         percept = worldMap.checkPerceptAtLocation(currentLocation);
         playGame();
     }
@@ -48,24 +59,33 @@ public class ReactiveAgent {
     private void playGame() {
         done = false;
 
-        for (int i = 0; i < worldMap.size * 20; i++) {
+        for (int i = 0; i < worldMap.size * 50; i++) {
             if (done == true) {
                 break;
             }
             
-            
+            if(!KB.KBMap[currentLocation.i][currentLocation.j].visited){
+                KB.KBMap[currentLocation.i][currentLocation.j].visited = true;
+                uniqueVisitedSpots++;
+            }
             percept = worldMap.checkPerceptAtLocation(currentLocation);
             
-            worldMap.print(currentLocation, direction);
-            printPercepts(percept, currentLocation);
+            //worldMap.print(currentLocation, direction);
+            //printPercepts(percept, currentLocation);
 
             reactiveMove();
 
         }
-        if(done != true){ //just for printing, when trapped
-        System.out.println("Got trapped");
-        }
 
+        if(done != true){ //just for printing, when trapped
+        System.out.println("End Result: Got trapped/out of moves!");
+        } 
+        
+        System.out.println(" "); 
+        printStats();
+//        System.out.println("Final Map State"); 
+//        worldMap.print(currentLocation, direction);
+   
     }
 
     private void resetPercepts() {
@@ -81,6 +101,7 @@ public class ReactiveAgent {
                 win();
             }
         } else if (percept[1]) {		//New room obstacle
+            obstacleBump++;
             updateLocationBackward();
 
         } else if (percept[3]) {		//Sense a wumpus
@@ -88,19 +109,25 @@ public class ReactiveAgent {
                 if (moveRand()) {
                     updateLocationForward();
                 }
-            } else if (!shootArrow()) {
-                turnRight();
-
+            } else if (arrowCount != 0) {
+                boolean scream = shootArrow();
+                if (scream){
+                    wumpusesKilled++;
+                } else {
+                    turnRight(); 
+                }
             }
         } else if (percept[2]) {		//Sense a breeze
             if (moveRand()) {
                 updateLocationForward();
             }
         } else if (percept[4]) {		//New room is Pit
-            System.out.println("Fell in a pit.");
+            deathByPit++;
+            //System.out.println("Fell in a pit.");
             payOff -= 100;
         } else if (percept[5]) {		//New room is Wumpus
-            System.out.println("Eaten by a Wumpus.");
+            deathByWump++;
+            //System.out.println("Eaten by a Wumpus.");
             payOff -= 100;
         } else if (moveRand()) {
             updateLocationForward();
@@ -151,9 +178,9 @@ public class ReactiveAgent {
     }
 
     private void win() {
-        System.out.println("The Agent Found The Gold And Won!");
+        System.out.println("End Result: The Agent Found The Gold And Won!");
         payOff += 1000;
-        printStats();
+        
         done = true;
     }
 
@@ -163,8 +190,13 @@ public class ReactiveAgent {
         System.out.println("Statistics:");
         System.out.println("    Final Gold: " + payOff);
         System.out.println("    Total number of moves: " + moveCounter);
+        System.out.println("    Unique rooms explored: " + uniqueVisitedSpots);
         System.out.println("    Wumpuses Killed: " + wumpusesKilled);
-        System.out.println("    Times died: " + timesDied);
+        System.out.println("    Times died by pit: " + deathByPit);
+        System.out.println("    Times died by wumpus: " + deathByWump);
+        System.out.println("    Number of obstacles: " + worldMap.getNumberObstacles());
+        System.out.println("    Number of obstacles bumped: " + obstacleBump);
+        System.out.println("");
     }
 
 ////////////////////////// End Game Execution Functions ////////////////////////////
@@ -172,7 +204,7 @@ public class ReactiveAgent {
     private boolean[] move() { //Moves the agent one space in the direction its facing.
         moveCounter++;
         payOff -= 1;
-        System.out.println(moveCounter + ": Moved forward.");
+        //System.out.println(moveCounter + ": Moved forward.");
         return worldMap.move(currentLocation, direction);  //Returns a list of 7 percepts
     }
 
@@ -184,7 +216,7 @@ public class ReactiveAgent {
         }
         payOff -= 1;
         moveCounter++;
-        System.out.println(moveCounter + ": Turned left.");
+        //System.out.println(moveCounter + ": Turned left.");
     }
 
     private void turnRight() { // Rotates the agent 90 degrees to the right
@@ -195,20 +227,20 @@ public class ReactiveAgent {
         }
         payOff -= 1;
         moveCounter++;
-        System.out.println(moveCounter + ": Turned right.");
+        //System.out.println(moveCounter + ": Turned right.");
     }
 
     private boolean shootArrow() {  //Shoots an arrow in the direction the agent is facing
         moveCounter++;
         if (arrowCount <= 0) {
-            System.out.println(moveCounter + ": Could not shoot an arrow.");
+            //System.out.println(moveCounter + ": Could not shoot an arrow.");
             return false;
         }
 
         arrowCount--;
-        System.out.println(arrowCount + " arrow#");
+        //System.out.println(arrowCount + " arrows");
         payOff -= 10; //shooting an arrow
-        System.out.println(moveCounter + ": Shot an arrow.");
+        //System.out.println(moveCounter + ": Shot an arrow.");
         if (worldMap.shootArrow(currentLocation, direction)) {
             payOff += 10; //killing a wumpus
             return true;
@@ -220,7 +252,7 @@ public class ReactiveAgent {
     private boolean grab() {
         moveCounter++;
         if (percept[6]) {
-            System.out.println(moveCounter + ": Grab gold.");
+            //System.out.println(moveCounter + ": Grab gold.");
             return true;
         }
         System.out.println(moveCounter + ": Grabbed but no gold.");
