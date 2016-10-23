@@ -66,7 +66,7 @@ public class WumpusWorld {
             System.out.println("    Average Unique Rooms Explored: " + avgUnqRooms);
             System.out.println("    Average Number of Wumpi Killed: " + avgWumpKilled);
             System.out.println("    Average Amount of Death by Pits: " + avgDeathPit);
-            System.out.println("    Average Amoutn of Death by Wumpus: " + avgDeathWump);
+            System.out.println("    Average Amount of Death by Wumpus: " + avgDeathWump);
             System.out.println("    Average Number of Obstacles Bumped into: " + avgObstacleBump);
             System.out.println("");
             
