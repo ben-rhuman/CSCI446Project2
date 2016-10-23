@@ -16,6 +16,8 @@ public class Map {
     private List<Location> wumpusList = new ArrayList();
     private Location goldLocation;
     private int numObstacles;
+    private int numPits;
+    private int numWumpus;
 
     public Map(int size, double p, double obs, double w) {
 
@@ -82,11 +84,12 @@ public class Map {
 
                 } else if (rNum > obs && rNum <= p) { //a pit was chosen
                     world[i][j].setRoom('p');
-
+                    numPits++;
                     setBreeze(i, j);
 
                 } else if (rNum > p && rNum <= w) {  //a wumpus was chosen
                     world[i][j].setRoom('w');
+                    numWumpus++;
                     setStench(i, j);
                     Location l = new Location(i, j);
                     wumpusList.add(l);
@@ -193,28 +196,28 @@ public class Map {
 
         try {
             if (direction == 1) {
-                
+
                 percept = checkPercepts(world[location.i][location.j - 1]);
-                if (location.i < 0 || location.i >= world.length || location.j-1 < 0 && location.j >= world.length) {
-                    percept[0] = false;        
+                if (location.i < 0 || location.i >= world.length || location.j - 1 < 0 && location.j >= world.length) {
+                    percept[0] = false;
                 }
             } else if (direction == 2) {
-                
+
                 percept = checkPercepts(world[location.i + 1][location.j]);
-                if (location.i < 0 || location.i+1 >= world.length || location.j < 0 && location.j >= world.length) {
+                if (location.i < 0 || location.i + 1 >= world.length || location.j < 0 && location.j >= world.length) {
                     percept[0] = false;
                 }
             } else if (direction == 3) {
-                
+
                 percept = checkPercepts(world[location.i][location.j + 1]);
-                if (location.i < 0 || location.i >= world.length || location.j < 0 && location.j+1 >= world.length) {
+                if (location.i < 0 || location.i >= world.length || location.j < 0 && location.j + 1 >= world.length) {
                     percept[0] = false;
                 }
             } else {
-                
+
                 percept = checkPercepts(world[location.i - 1][location.j]);
-                if (location.i-1 < 0 || location.i >= world.length || location.j < 0 && location.j >= world.length) {
-                    percept[0] = false; 
+                if (location.i - 1 < 0 || location.i >= world.length || location.j < 0 && location.j >= world.length) {
+                    percept[0] = false;
                 }
             }
         } catch (IndexOutOfBoundsException e) {
@@ -234,6 +237,7 @@ public class Map {
         } else if (room.getRoom() == 'p') {
             percept[0] = false;
             percept[4] = true;
+            
         } else if (room.getRoom() == 'w') {
             percept[0] = false;
             percept[5] = true;
@@ -319,8 +323,15 @@ public class Map {
     public int getNumberWumpus() {
         return wumpusList.size();
     }
+
     public int getNumberObstacles() {
         return numObstacles;
+    }
+    public int getNumberPits(){
+        return numPits;
+    }
+    public int getNumberWump2(){
+        return numWumpus;
     }
 /////////////////End Agent Interfacing Methods//////////////////////
 
